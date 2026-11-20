@@ -37,6 +37,7 @@ spec:
       labels:
         app.kubernetes.io/name: rustfs
     spec:
+      enableServiceLinks: false
       priorityClassName: storage-critical
       nodeSelector:
         hw5/pool: storage
@@ -88,9 +89,9 @@ spec:
           resources:
             requests:
               cpu: "1"
-              memory: 768Mi
+              memory: 1Gi
             limits:
-              memory: 1536Mi
+              memory: 4Gi
           volumeMounts:
             - name: disk1
               mountPath: /data/disk1
