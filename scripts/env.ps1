@@ -43,12 +43,24 @@ function Step([scriptblock]$Block) {
     $body = ((& $Block 2>&1) | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { "$_" } else { $_ } } |
         Out-String -Width 1000).TrimEnd()
     $text = "$header`n$body`n"
-    Add-Content -Path $script:CurrentLog -Value $text -Encoding utf8
+    Write-Log $text
     Write-Host $text
 }
 
+function Write-Log([string]$Text) {
+    for ($i = 1; $i -le 20; $i++) {
+        try {
+            Add-Content -Path $script:CurrentLog -Value $Text -Encoding utf8 -ErrorAction Stop
+            return
+        } catch [System.IO.IOException] {
+            Start-Sleep -Milliseconds (100 * $i)
+        }
+    }
+    throw "cannot write $script:CurrentLog"
+}
+
 function Note([string]$Text) {
-    Add-Content -Path $script:CurrentLog -Value "# $Text`n" -Encoding utf8
+    Write-Log "# $Text`n"
     Write-Host "# $Text`n"
 }
 
