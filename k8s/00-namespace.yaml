@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hw5
+  labels:
+    app.kubernetes.io/part-of: hhlake
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-credentials
+  namespace: hw5
+type: Opaque
+stringData:
+  AWS_ACCESS_KEY_ID: labadmin
+  AWS_SECRET_ACCESS_KEY: labsecret123
