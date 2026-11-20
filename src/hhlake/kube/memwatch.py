@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -79,7 +80,17 @@ def main() -> None:
     watcher = Watcher(a.interval, a.report_every)
     watcher.start()
     t0 = time.monotonic()
-    code = subprocess.call(command)
+    child = subprocess.Popen(command)
+
+    def forward(signum: int, _frame: object) -> None:
+        print(f"[mem] got signal {signal.Signals(signum).name} at {time.monotonic() - t0:.1f} s, forwarding to child")
+        child.send_signal(signum)
+
+    signal.signal(signal.SIGTERM, forward)
+    signal.signal(signal.SIGINT, forward)
+    code = child.wait()
+    if code < 0:
+        code = 128 - code
     elapsed = time.monotonic() - t0
     watcher.stop.set()
     watcher.join()
