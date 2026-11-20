@@ -226,7 +226,7 @@ def build_snippets() -> None:
         [
             pick("08_quota.txt", r"Pods hw5-quota"),
             pick("08_quota.txt", r"describe resourcequota", 1),
-            pick("08_quota.txt", r"reason=FailedCreate", head_tail=(1, 0)),
+            pick("08_quota.txt", r"reason=FailedCreate", head_tail=(2, 0)),
             pick("08_quota.txt", r"foreach \(\$n in \"hw5-worker\""),
         ],
     )

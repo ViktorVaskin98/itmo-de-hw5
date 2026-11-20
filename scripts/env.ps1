@@ -131,8 +131,10 @@ function Save-PodLogs([string]$Name, [string]$Namespace, [string]$Selector) {
     New-Item -ItemType Directory -Force $dir | Out-Null
     $pods = & kubectl --context $script:Ctx -n $Namespace get pods -l $Selector -o "jsonpath={.items[*].metadata.name}" 2>$null
     foreach ($pod in ($pods -split " " | Where-Object { $_ })) {
-        & kubectl --context $script:Ctx -n $Namespace logs $pod 2>&1 | ForEach-Object { "$_" } |
-            Set-Content (Join-Path $dir "$pod.log") -Encoding utf8
+        $path = Join-Path $dir "$pod.log"
+        $text = @(& kubectl --context $script:Ctx -n $Namespace logs $pod 2>&1 | ForEach-Object { "$_" })
+        if ((Test-Path $path) -and ($text -join "`n") -match "^unable to retrieve container logs") { continue }
+        $text | Set-Content $path -Encoding utf8
     }
     return $dir
 }

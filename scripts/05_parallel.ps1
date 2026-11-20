@@ -40,6 +40,6 @@ $env:S3_ENDPOINT = $ClusterS3
 Remove-Item -Recurse -Force work\par_stacks -ErrorAction SilentlyContinue
 Step { uvpy -m hhlake.verify --a results/k8s/par --b results/hw3/mapreduce --export work\par_stacks | Select-Object -Last 2 }
 Step { foreach ($n in "skills", "pairs", "triples") { "$n.csv: $((Get-FileHash work\par_stacks\$n.csv).Hash -eq (Get-FileHash (Join-Path $Hw3Stacks "$n.csv")).Hash)" } }
-Step { Get-Content work\par_stacks\pairs.csv -TotalCount 11 }
+Step { Get-Content work\par_stacks\pairs.csv -TotalCount 11 -Encoding UTF8 }
 Step { Storage-Memory }
 Finish
