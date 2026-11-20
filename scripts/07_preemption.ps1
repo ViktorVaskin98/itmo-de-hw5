@@ -7,15 +7,15 @@ $Urgent = @{ NAME = "urgent"; NAMESPACE = "hw5"; PRIORITY = "batch-high"; WORKER
     S3_ENDPOINT = "http://rustfs.hw5.svc.cluster.local:9000"; CPU_REQUEST = "2"; CPU_LIMIT = "4" }
 
 Start-Log "07_preemption"
-Note "Этап 4б. Вытеснение: фоновый расчёт low (batch-low, сплиты по 64 MiB - 13 задач подольше, по 1 CPU) занимает оба воркера: по 3 пода, свободно по 0,9 CPU. Срочный расчёт из ДЗ 3 (batch-high, requests 2 CPU, предел $Limit из этапа 1) приходит, когда места нет"
+Note "Этап 4б. Вытеснение: фоновый расчёт low (batch-low, сплиты по 128 MiB - 7 задач по ~20 с, по 1 CPU) занимает оба воркера: по 3 пода, свободно по 0,9 CPU. Срочный расчёт из ДЗ 3 (batch-high, requests 2 CPU, предел $Limit из этапа 1) приходит, когда места нет"
 kc delete jobs -n hw5 -l "hw5/run in (low, urgent, urgent-verify)" --ignore-not-found | Out-Null
 Step { kc get priorityclass -o "custom-columns=NAME:.metadata.name,VALUE:.value,PREEMPTION:.preemptionPolicy,GLOBAL_DEFAULT:.globalDefault" }
-$low = Run-Vars "low" @{ PRIORITY = "batch-low"; CHUNK_MB = 64; SPLITS = 13 }
+$low = Run-Vars "low" @{ PRIORITY = "batch-low"; CHUNK_MB = 128; SPLITS = 7 }
 Step { Start-Map $low }
 Step { Wait-Running hw5 "hw5/run=low" 6 }
 Step { Pods hw5 "hw5/run=low" | Select-Object -First 10 }
 & uv run --quiet python -m hhlake.kube.clean --run urgent | Out-Null
-Step { "submit at $(Stamp)"; Submit "10-hw3-job.yaml" $Urgent "urgent" }
+Step { Submit "10-hw3-job.yaml" $Urgent "urgent"; kc -n hw5 get job urgent -o "jsonpath=job urgent created {.metadata.creationTimestamp}" }
 Step { Watch-Disruption hw5 "hw5/run=low" 10 "low" }
 Step { Pods hw5 "hw5/run in (low, urgent)" }
 Step { kc -n hw5 get events --field-selector reason=Preempted -o "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,MESSAGE:.message" }

@@ -7,6 +7,7 @@ Note "Этап 2. RustFS из ДЗ 2 внутри кластера: тот же 
 Step { Get-Content k8s\20-rustfs.yaml | Select-Object -First 70 }
 Step { kc apply -f k8s\00-namespace.yaml -f k8s\05-priority.yaml -f k8s\20-rustfs.yaml }
 Step { kc -n hw5 rollout status statefulset/rustfs --timeout=300s }
+Step { docker inspect rustfs-lab --format "rustfs-lab: {{.Image}}"; kc -n hw5 get pod rustfs-0 -o "jsonpath=rustfs-0:   {.status.containerStatuses[0].imageID}" }
 Step { kc -n hw5 get "statefulset,pod,svc" -o wide }
 Step { kc -n hw5 get pvc -o "custom-columns=PVC:.metadata.name,STATUS:.status.phase,SIZE:.status.capacity.storage,CLASS:.spec.storageClassName,VOLUME:.spec.volumeName" }
 Step { kc get pv -o "custom-columns=PV:.metadata.name,CLAIM:.spec.claimRef.name,NODE:.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].values[0],PATH:.spec.hostPath.path" }
@@ -17,7 +18,7 @@ kc -n hw5 delete job s3-migrate --ignore-not-found | Out-Null
 Step { kc apply -f k8s\21-migrate-job.yaml }
 Step { "job/s3-migrate -> $(Wait-JobDone hw5 s3-migrate 900)" }
 Step { Show-Log hw5 job/s3-migrate }
-Step { (Get-FileHash C:\itmo\vk\task2\it_vacancies_2024.csv -Algorithm MD5).Hash.ToLower() }
+Step { (Get-FileHash $Csv -Algorithm MD5).Hash.ToLower() }
 Save-PodLogs "storage" hw5 "hw5/stage=migrate" | Out-Null
 
 Note "Раскладка по дискам: на каждом из восьми томов около 1/4 объекта - 4 блока данных и 4 чётности"

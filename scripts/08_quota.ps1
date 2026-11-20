@@ -3,7 +3,7 @@ $ErrorActionPreference = "Continue"
 Set-Location $Root
 
 Start-Log "08_quota"
-Note "Этап 4в. Квота пространства имён hw5-quota: 3 CPU и 1Gi на всё пространство, хотя в кластере свободно 8 CPU"
+Note "Этап 4в. Квота пространства имён hw5-quota: 3 CPU и 1Gi на всё пространство, хотя на воркерах для заданий есть 7,8 CPU"
 kc delete namespace hw5-quota --ignore-not-found --wait=true | Out-Null
 Step { Get-Content k8s\40-quota.yaml | Select-Object -Skip 18 }
 Step { kc apply -f k8s\40-quota.yaml }
@@ -21,11 +21,10 @@ Note "Map из 26 сплитов с parallelism 8 по 1 CPU: квота про�
 $quota = Run-Vars "quota" @{ NAMESPACE = "hw5-quota" }
 Step { Start-Map $quota }
 Step { Wait-Running hw5-quota "hw5/run=quota" 3 }
-Start-Sleep 3
 Step { Pods hw5-quota "hw5/run=quota" }
+Step { foreach ($n in "hw5-worker", "hw5-worker2") { "--- $n"; kc describe node $n | Select-String -Pattern "^\s+cpu\s" | Select-Object -Last 1 | ForEach-Object { $_.Line.Trim() } } }
 Step { kc -n hw5-quota describe resourcequota hw5-quota }
 Step { kc -n hw5-quota get events --field-selector reason=FailedCreate -o "custom-columns=LAST:.lastTimestamp,OBJECT:.involvedObject.name,COUNT:.count,MESSAGE:.message" | Select-Object -First 4 }
-Step { kc describe node hw5-worker | Select-String -Pattern "Allocated resources:" -Context 0,6 }
 Step { Complete-Run $quota }
 Step { Show-Job hw5-quota quota-map }
 Step { uvpy tools\timeline.py logs\state\runs\quota }

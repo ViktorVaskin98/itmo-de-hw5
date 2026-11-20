@@ -12,6 +12,8 @@ $script:Root = Split-Path $PSScriptRoot -Parent
 $script:LogDir = Join-Path $script:Root "logs"
 $script:HostS3 = "http://127.0.0.1:9000"
 $script:ClusterS3 = "http://127.0.0.1:9100"
+$script:Csv = if ($env:HW5_CSV) { $env:HW5_CSV } else { "C:\itmo\vk\task2\it_vacancies_2024.csv" }
+$script:Hw3Stacks = if ($env:HW3_STACKS) { $env:HW3_STACKS } else { "C:\itmo\vk\task3\results\stacks" }
 New-Item -ItemType Directory -Force $script:LogDir | Out-Null
 
 $script:Failed = $false
@@ -39,7 +41,7 @@ function Start-Log([string]$Name) {
 function Step([scriptblock]$Block) {
     $header = "PS> " + $Block.ToString().Trim()
     $body = ((& $Block 2>&1) | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { "$_" } else { $_ } } |
-        Out-String -Width 250).TrimEnd()
+        Out-String -Width 1000).TrimEnd()
     $text = "$header`n$body`n"
     Add-Content -Path $script:CurrentLog -Value $text -Encoding utf8
     Write-Host $text
@@ -198,6 +200,10 @@ function Watch-Disruption([string]$Namespace, [string]$Selector, [int]$Seconds, 
                 "$($cond.lastTransitionTime) $($pod.metadata.name) on $($pod.spec.nodeName), phase $($pod.status.phase): DisruptionTarget $($cond.reason) - $($cond.message)"
             }
             $seen[$pod.metadata.name] = $pod
+            $logDir = Join-Path $script:LogDir "pods\runs\$Name"
+            New-Item -ItemType Directory -Force $logDir | Out-Null
+            $text = & kubectl --context $script:Ctx -n $Namespace logs $pod.metadata.name 2>$null
+            if ($text) { $text | Set-Content (Join-Path $logDir "$($pod.metadata.name).log") -Encoding utf8 }
         }
         Start-Sleep -Milliseconds 250
     }

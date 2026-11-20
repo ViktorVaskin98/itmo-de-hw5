@@ -15,6 +15,7 @@ Note "Этап 0. kind $KindVersion с GitHub, проверка sha256; kubectl 
 Step { (Get-FileHash "$Dl\kind-windows-amd64" -Algorithm SHA256).Hash.ToLower() -eq (Get-Content "$Dl\kind-windows-amd64.sha256sum").Split(" ")[0] }
 if (-not (Test-Path $Kind)) { Copy-Item "$Dl\kind-windows-amd64" $Kind }
 Step { kind version; kubectl version --client }
+Step { $cs = Get-CimInstance Win32_ComputerSystem; "host: $($cs.NumberOfLogicalProcessors) logical CPU, $([math]::Round($cs.TotalPhysicalMemory / 1GB, 1)) GiB RAM, $((Get-CimInstance Win32_OperatingSystem).Caption)" }
 Step { docker info --format "Docker {{.ServerVersion}}, VM: {{.NCPU}} CPU, {{.MemTotal}} bytes RAM, cgroup v{{.CgroupVersion}}, kernel {{.KernelVersion}}" }
 
 Note "Кластер: control-plane (на нём же хранилище) и два воркера; у воркеров system-reserved cpu=8, memory=5Gi, остаётся по 4 CPU для заданий"
@@ -30,5 +31,11 @@ Note "Хранилище из ДЗ 2-3 (контейнер rustfs-lab, баке�
 Step { docker ps --filter name=rustfs-lab --format "{{.Names}} {{.Image}} {{.Status}}" }
 & docker network disconnect kind rustfs-lab 2>$null
 Step { docker network connect kind rustfs-lab; docker network inspect kind --format "{{range .Containers}}{{.Name}} {{.IPv4Address}}{{println}}{{end}}" }
-Step { kc run dnscheck --image=busybox:1.37 --restart=Never --rm -i --command '--' sh -c "nslookup rustfs-lab.  | tail -2; wget -q -O - http://rustfs-lab:9000/health" }
+kc delete pod dnscheck --ignore-not-found | Out-Null
+Step { kc run dnscheck --image=busybox:1.37 --restart=Never --command '--' sh -c "nslookup rustfs-lab. | tail -3; wget -q -O - http://rustfs-lab:9000/health" }
+Step { kc wait --for=jsonpath="{.status.phase}=Succeeded" pod/dnscheck --timeout=120s }
+Step { kc logs dnscheck }
+$dns = & kubectl --context $Ctx logs dnscheck 2>$null
+kc delete pod dnscheck | Out-Null
+if (-not ($dns -match '"status":"ok"')) { Fail "rustfs-lab недоступен из пода" }
 Finish

@@ -35,5 +35,11 @@ Step { uvpy tools\timeline.py logs\state\runs\par }
 Step { Get-Content logs\pods\runs\par\par-map-7-*.log | Where-Object { $_ -notmatch "^\[mem-json\]" } }
 Step { Get-Content logs\pods\runs\par\par-reduce-0-*.log | Where-Object { $_ -notmatch "^\[mem-json\]" } }
 Step { Show-Log hw5 job/par-commit }
+Note "Прямая сверка с файлом из репозитория ДЗ 3: выгружаю частоты пар этого прогона тем же способом, что в ДЗ 3 (--export), и сравниваю побайтно"
+$env:S3_ENDPOINT = $ClusterS3
+Remove-Item -Recurse -Force work\par_stacks -ErrorAction SilentlyContinue
+Step { uvpy -m hhlake.verify --a results/k8s/par --b results/hw3/mapreduce --export work\par_stacks | Select-Object -Last 2 }
+Step { foreach ($n in "skills", "pairs", "triples") { "$n.csv: $((Get-FileHash work\par_stacks\$n.csv).Hash -eq (Get-FileHash (Join-Path $Hw3Stacks "$n.csv")).Hash)" } }
+Step { Get-Content work\par_stacks\pairs.csv -TotalCount 11 }
 Step { Storage-Memory }
 Finish

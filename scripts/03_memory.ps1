@@ -31,6 +31,9 @@ Start-Log "03_memory"
 Note "Этап 1. Расчёт из ДЗ 3 как задание Kubernetes: мастер и 8 воркеров в одном контейнере, хранилище пока снаружи кластера (rustfs-lab). Обёртка hhlake.kube.memwatch читает память своего cgroup каждые 0.1 с"
 kc delete jobs -n hw5 -l hw5/stage=hw3-job --ignore-not-found | Out-Null
 Step { kc apply -f k8s\00-namespace.yaml -f k8s\05-priority.yaml }
+Note "Мастер ДЗ 3 перед расчётом удаляет свой выходной префикс в rustfs-lab по одному объекту (~1 с на объект в RustFS); выводы прошлых прогонов удаляю заранее пакетом, чтобы это не попадало в замер"
+$env:S3_ENDPOINT = $HostS3
+Step { uvpy -m hhlake.kube.clean --prefix results/k8s }
 Step { Get-Content k8s\10-hw3-job.yaml }
 
 Note "Запуск 1: предел 256Mi. В ДЗ 3 пик одного процесса был 91-97 MiB, но процессов в контейнере десять"
@@ -62,6 +65,8 @@ Step { kc -n hw5 get jobs -l hw5/stage=hw3-job -o "custom-columns=JOB:.metadata.
 Step { uvpy -m hhlake.kube.sizing logs\pods\hw3\hw3-tuned-1 logs\pods\hw3\hw3-tuned-2 logs\pods\hw3\hw3-tuned-3 }
 Step { Select-String -Path logs\pods\hw3\hw3-tuned-*\*.log -Pattern "memory.events|\[cpu\]" | ForEach-Object { "$($_.Filename): $($_.Line)" } }
 Step { Show-Log hw5 job/hw3-tuned-1 "^\[mem-json\]|^\[mem\] +\d" }
+Note "Результат запуска с подобранным пределом против вывода ДЗ 3 в том же rustfs-lab"
+Step { uvpy -m hhlake.verify --a results/k8s/hw3-tuned-1 --b results/mapreduce --top 10 }
 
 $Below = "$([int]([math]::Floor($Anon / 64) * 64))Mi"
 Note "Граница снизу: предел $Below - ниже пика анонимной памяти ($Anon MiB), которую ядро не может вытеснить, как кэш файлов"
