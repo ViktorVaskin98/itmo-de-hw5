@@ -2,9 +2,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ${NAME}
-  namespace: hw5
+  namespace: ${NAMESPACE}
   labels:
     app.kubernetes.io/name: hhlake
+    hw5/run: ${NAME}
     hw5/stage: hw3-job
 spec:
   backoffLimit: 2
@@ -19,9 +20,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: hhlake
+        hw5/run: ${NAME}
         hw5/stage: hw3-job
     spec:
       restartPolicy: Never
+      priorityClassName: ${PRIORITY}
       nodeSelector:
         hw5/pool: batch
       containers:

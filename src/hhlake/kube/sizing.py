@@ -28,6 +28,8 @@ def main() -> None:
     p.add_argument("--headroom", type=float, default=1.2)
     p.add_argument("--step-mib", type=int, default=64)
     p.add_argument("--quiet", action="store_true", help="print only the recommended limit, e.g. 704Mi")
+    p.add_argument("--peak-only", action="store_true", help="print only the max memory.peak in MiB")
+    p.add_argument("--anon-only", action="store_true", help="print only the max sampled anon memory in MiB")
     a = p.parse_args()
 
     runs = [s for s in summaries(a.paths) if s["exit"] == 0]
@@ -35,6 +37,12 @@ def main() -> None:
         raise SystemExit("no successful runs with [mem-summary] found")
     peak = max(s["memory_peak"] for s in runs)
     limit = recommend(peak, a.headroom, a.step_mib)
+    if a.anon_only:
+        print(math.ceil(max(s["sampled"]["anon"] for s in runs) / MIB))
+        return
+    if a.peak_only:
+        print(math.ceil(peak / MIB))
+        return
     if a.quiet:
         print(f"{limit}Mi")
         return
