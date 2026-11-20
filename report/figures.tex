@@ -1,0 +1,34 @@
+\tikzset{
+  bx/.style={draw=black!45,rounded corners=2pt,align=center,font=\sffamily\footnotesize,inner sep=3pt,line width=0.5pt,fill=white},
+  arr/.style={-{Stealth[length=5pt,width=4pt]},line width=0.7pt,draw=black!65},
+  lab/.style={font=\sffamily\fontsize{7}{8}\selectfont,align=center,text=black!75,inner sep=1.5pt},
+  knode/.style={draw=acc,fill=accL!40,rounded corners=4pt,line width=0.7pt,inner sep=2.5mm},
+  pod/.style={draw=acc,fill=white,rounded corners=2pt,font=\sffamily\scriptsize,text=accD,minimum height=8mm,inner sep=2pt,align=center},
+  cp/.style={draw=black!40,fill=inkL,rounded corners=2pt,font=\sffamily\scriptsize,text=black!75,inner sep=2pt,align=center},
+  st/.style={draw=dataC!80!black,fill=dataL,rounded corners=2pt,font=\sffamily\scriptsize,text=dataC!60!black,inner sep=2pt,align=center},
+  old/.style={draw=parC,fill=parL,rounded corners=2pt,font=\sffamily\scriptsize,text=parC!70!black,inner sep=3pt,align=center},
+  zone/.style={draw=rule,rounded corners=4pt,line width=0.7pt,inner sep=3mm},
+}
+
+\newcommand{\figStand}{%
+\begin{center}
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm]
+\node[cp,text width=30mm] (api) at (0,1.15) {\mono{kube-apiserver}, \mono{etcd}\\\mono{kube-scheduler}\\\mono{kube-controller-manager}\\Job-контроллер};
+\node[st,text width=30mm] (rfs) at (0,-0.85) {\tech{rustfs-0} (StatefulSet)\\RustFS 1.0.1, EC 4+4\\8 PVC \mono{local-path}\\Service \mono{rustfs}: 9000};
+\node[pod,text width=25mm] (w1a) at (4.6,1.0) {map / reduce / commit\\Indexed Job, 1 CPU};
+\node[pod,text width=25mm] (w1b) at (4.6,-0.5) {расчёт ДЗ 3 (Job)\\мастер + 8 воркеров};
+\node[pod,text width=25mm] (w2a) at (8.2,1.0) {map / reduce / commit\\Indexed Job, 1 CPU};
+\node[pod,text width=25mm] (w2b) at (8.2,-0.5) {\dots};
+\begin{scope}[on background layer]
+\node[zone,fill=white,fit={(api)(w2a)(0,2.9)(0,-2.1)(9.6,0)},label={[lab,anchor=north west]south west:{\textbf{kind-кластер hw5} (Kubernetes 1.34.11): три контейнера-узла в docker-сети \mono{kind}; Docker Desktop / WSL\,2, 12 CPU, 7,4\,GiB}}] (k) {};
+\node[knode,fit=(api)(rfs),label={[lab,anchor=south,align=center]north:{\textbf{hw5-control-plane}\\\mono{hw5/pool=storage}, taint control-plane}}] (ncp) {};
+\node[knode,fit=(w1a)(w1b),label={[lab,anchor=south,align=center]north:{\textbf{hw5-worker}\\allocatable 4 CPU, 2,36\,GiB}}] (nw1) {};
+\node[knode,fit=(w2a)(w2b),label={[lab,anchor=south,align=center]north:{\textbf{hw5-worker2}\\allocatable 4 CPU, 2,36\,GiB}}] (nw2) {};
+\end{scope}
+\draw[arr] (w1a.west)--node[lab,above]{S3} (rfs.east);
+\node[old,text width=34mm] (lab) at (15.3,1.0) {\tech{rustfs-lab} из ДЗ 2--3\\\mono{hh-lake/raw/...csv}\\\mono{results/mapreduce/} --- эталон};
+\draw[arr,parC] (lab.west)--node[lab,above,text=parC!70!black]{этап 1: \mono{rustfs-lab:9000}}node[lab,below,text=parC!70!black]{перенос: \mono{s3-migrate}} (k.east|-lab.west);
+\node[bx,text width=34mm] (host) at (15.3,-1.0) {\tech{Windows-хост}\\\mono{kubectl}, \mono{kind}, скрипты\\\mono{127.0.0.1:9100} $\to$ NodePort 30900};
+\draw[arr] (host.south) -- ++(0,-1.75) -| node[lab,above,pos=0.25]{\mono{extraPortMappings}: 127.0.0.1:9100 $\to$ узел :30900} (rfs.south);
+\end{tikzpicture}}
+\end{center}}

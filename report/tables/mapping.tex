@@ -1,0 +1,18 @@
+\begin{table}[H]\centering\small
+\caption{Соответствие компонентов. В правом столбце --- где это было в моём стенде}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{3.0cm}X}
+\toprule
+\textbf{Роль} & \textbf{YARN} & \textbf{Mesos} & \textbf{Kubernetes} & \textbf{У меня} \\
+\midrule
+учёт ресурсов кластера & ResourceManager & master & API server + etcd (\mono{allocatable} узлов) & 2 воркера по 4 CPU / 2,36\,GiB \\
+выбор узла & Scheduler в RM (Capacity / Fair) & аллокатор мастера предлагает, фреймворк выбирает & \mono{kube-scheduler} & \mono{nodeSelector hw5/pool} \\
+агент на узле & NodeManager & agent (slave) & kubelet + containerd & узлы-контейнеры kind \\
+единица запуска & container (MB + vcores) & task в executor & pod (\mono{requests}/\mono{limits}) & под map, reduce, расчёт ДЗ 3 \\
+логика приложения & ApplicationMaster & scheduler фреймворка (Marathon, Spark) & контроллер (Job) или оператор & Indexed Job + скрипт стадий \\
+изоляция & монитор RSS или cgroups & containerizer (cgroups) & cgroups v2 через kubelet & \mono{memory.max}, \mono{cpu.max} \\
+доли и потолки & очереди: capacity / max-capacity & роли: веса, квоты, резервирования & ResourceQuota, LimitRange & \mono{hw5-quota}: 3 CPU, 1Gi \\
+важность задач & приоритет приложений, вытеснение между очередями & нет общего; revocable-ресурсы & PriorityClass, вытеснение подов & \mono{batch-low} / \mono{batch-high} \\
+\bottomrule
+\end{tabularx}
+\end{table}
