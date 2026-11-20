@@ -217,7 +217,9 @@ function Watch-Disruption([string]$Namespace, [string]$Selector, [int]$Seconds, 
             $logDir = Join-Path $script:LogDir "pods\runs\$Name"
             New-Item -ItemType Directory -Force $logDir | Out-Null
             $text = & kubectl --context $script:Ctx -n $Namespace logs $pod.metadata.name 2>$null
-            if ($text) { $text | Set-Content (Join-Path $logDir "$($pod.metadata.name).log") -Encoding utf8 }
+            if ($text -and -not (($text -join "`n") -match "^unable to retrieve container logs")) {
+                $text | Set-Content (Join-Path $logDir "$($pod.metadata.name).log") -Encoding utf8
+            }
         }
         Start-Sleep -Milliseconds 250
     }
