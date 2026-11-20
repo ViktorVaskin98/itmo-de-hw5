@@ -1,0 +1,13 @@
+.venv
+.git
+logs
+work
+report
+scripts
+tools
+tests
+k8s
+cluster
+**/__pycache__
+*.md
+*.pdf
