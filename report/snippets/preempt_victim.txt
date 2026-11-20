@@ -1,0 +1,4 @@
+¤cPrompt¦PS> ¢¤cCmd¦Get-Content logs\pods\runs\low\low-map-2-w5zh2.log¢
+¤cText¦[map m0002 low-map-2] split 3/7: bytes 268,435,456-402,653,184 of s3://hh-lake/raw/it_vacancies_2024.csv¢
+¤cText¦[mem] got signal SIGTERM at 8.8 s, forwarding to child¢
+¤cText¦[mem] exit code 143, wall 9.0 s¢

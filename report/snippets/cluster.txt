@@ -1,0 +1,33 @@
+¤cPrompt¦PS> ¢¤cCmd¦(Get-FileHash "$Dl\kind-windows-amd64" -Algorithm SHA256).Hash.ToLower() -eq (Get-Content¢
+¤cPrompt¦    ¢¤cCmd¦    "$Dl\kind-windows-amd64.sha256sum").Split(" ")[0]¢
+¤cGood¦True¢
+
+¤cPrompt¦PS> ¢¤cCmd¦$cs = Get-CimInstance Win32_ComputerSystem; "host: $($cs.NumberOfLogicalProcessors) logical CPU,¢
+¤cPrompt¦    ¢¤cCmd¦    $([math]::Round($cs.TotalPhysicalMemory / 1GB, 1)) GiB RAM, $((Get-CimInstance¢
+¤cPrompt¦    ¢¤cCmd¦    Win32_OperatingSystem).Caption)"¢
+¤cText¦host: 12 logical CPU, 15.2 GiB RAM, Майкрософт Windows 11 Pro¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kind version; kubectl version --client¢
+¤cText¦kind v0.33.0 go1.26.7 windows/amd64¢
+¤cText¦Client Version: v1.34.1¢
+¤cText¦Kustomize Version: v5.7.1¢
+
+¤cPrompt¦PS> ¢¤cCmd¦docker info --format "Docker ¤textbraceleft¦¢¤textbraceleft¦¢.ServerVersion¤textbraceright¦¢¤textbraceright¦¢, VM: ¤textbraceleft¦¢¤textbraceleft¦¢.NCPU¤textbraceright¦¢¤textbraceright¦¢ CPU, ¤textbraceleft¦¢¤textbraceleft¦¢.MemTotal¤textbraceright¦¢¤textbraceright¦¢ bytes RAM, cgroup¢
+¤cPrompt¦    ¢¤cCmd¦    v¤textbraceleft¦¢¤textbraceleft¦¢.CgroupVersion¤textbraceright¦¢¤textbraceright¦¢, kernel ¤textbraceleft¦¢¤textbraceleft¦¢.KernelVersion¤textbraceright¦¢¤textbraceright¦¢"¢
+¤cText¦Docker 29.1.2, VM: 12 CPU, 7899131904 bytes RAM, cgroup v2, kernel 6.6.87.2-microsoft-standard-WSL2¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kind create cluster --config cluster\kind.yaml¢
+¤cText¦Creating cluster "hw5" ...¢
+¤cText¦ • Ensuring node image (kindest/node:v1.34.11)   ...¢
+¤cText¦...¢
+¤cText¦You can now use your cluster with:¢
+¤cText¦kubectl cluster-info --context kind-hw5¢
+¤cText¦Thanks for using kind!¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc get nodes -o "custom-columns=NODE:.metadata.name,POOL:.metadata.labels.hw5/pool,CPU:.status.capacity.cpu,ALLOC_¢
+¤cPrompt¦    ¢¤cCmd¦    CPU:.status.allocatable.cpu,MEMORY:.status.capacity.memory,ALLOC_MEMORY:.status.allocatable.memory,TAINTS:.spe¢
+¤cPrompt¦    ¢¤cCmd¦    c.taints[*].key"¢
+¤cVerb¦NODE                POOL      CPU   ALLOC_CPU   MEMORY      ALLOC_MEMORY   TAINTS¢
+¤cText¦hw5-control-plane   storage   12    12          7713996Ki   7713996Ki      node-role.kubernetes.io/control-plane¢
+¤cText¦hw5-worker          batch     12    4           7713996Ki   2471116Ki      <none>¢
+¤cText¦hw5-worker2         batch     12    4           7713996Ki   2471116Ki      <none>¢

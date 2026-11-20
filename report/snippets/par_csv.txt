@@ -1,0 +1,23 @@
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.verify --a results/k8s/par --b results/hw3/mapreduce --export work\par_stacks | Select-Object -Last¢
+¤cPrompt¦    ¢¤cCmd¦    2¢
+¤cGood¦RESULT: all three stacks are identical¢
+¤cText¦exported MapReduce result to work\par_stacks/¤textbraceleft¦¢skills,pairs,triples¤textbraceright¦¢.csv¢
+
+¤cPrompt¦PS> ¢¤cCmd¦foreach ($n in "skills", "pairs", "triples") ¤textbraceleft¦¢ "$n.csv: $((Get-FileHash work\par_stacks\$n.csv).Hash -eq¢
+¤cPrompt¦    ¢¤cCmd¦    (Get-FileHash (Join-Path $Hw3Stacks "$n.csv")).Hash)" ¤textbraceright¦¢¢
+¤cGood¦skills.csv: True¢
+¤cGood¦pairs.csv: True¢
+¤cGood¦triples.csv: True¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Get-Content work\par_stacks\pairs.csv -TotalCount 11 -Encoding UTF8¢
+¤cText¦skill1,skill2,vacancies¢
+¤cText¦c++,linux,908¢
+¤cText¦c/c++,linux,611¢
+¤cText¦git,linux,558¢
+¤cText¦c++,git,542¢
+¤cText¦c++,qt,535¢
+¤cText¦c++,stl,411¢
+¤cText¦linux,qt,326¢
+¤cText¦c++,python,280¢
+¤cText¦c++,ооп,280¢
+¤cText¦c++,sql,273¢

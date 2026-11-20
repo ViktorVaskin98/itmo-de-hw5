@@ -1,0 +1,28 @@
+¤cPrompt¦PS> ¢¤cCmd¦Show-Log hw5 job/s3-migrate¢
+¤cText¦source http://rustfs-lab:9000  ->  target http://rustfs:9000¢
+¤cGood¦created bucket hh-lake¢
+¤cGood¦OK  raw/it_vacancies_2024.csv                       847,619,384 B  md5 45041a115287.. / 45041a115287.. 45.47 s   17.8¢
+¤cText¦  MiB/s¢
+¤cGood¦OK  results/hw3/mapreduce/_SUCCESS                            0 B  md5 d41d8cd98f00.. / d41d8cd98f00.. 0.25 s¢
+¤cGood¦OK  results/hw3/mapreduce/_job.json                       6,169 B  md5 35693e73c299.. / 35693e73c299.. 0.08 s¢
+¤cGood¦OK  results/hw3/mapreduce/pairs/part-r-00000.csv        130,711 B  md5 dcbd52eb7e3b.. / dcbd52eb7e3b.. 0.10 s¢
+¤cText¦...¢
+¤cGood¦OK  results/hw3/mapreduce/triples/part-r-00003.csv      892,635 B  md5 b4bcc5f78f24.. / b4bcc5f78f24.. 0.31 s¢
+¤cText¦target s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes, ETag "be9c1b4b3f57ff0e9771004c2a5fe78b-51"¢
+¤cGood¦copied 15 objects, checksums match¢
+
+¤cPrompt¦PS> ¢¤cCmd¦(Get-FileHash $Csv -Algorithm MD5).Hash.ToLower()¢
+¤cText¦45041a115287e29b41fc8f82818ec5a6¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 exec rustfs-0 '--' sh -c "du -sh /data/disk*; ls /data/disk1/hh-lake/raw/it_vacancies_2024.csv/*/ | head¢
+¤cPrompt¦    ¢¤cCmd¦    -4"¢
+¤cText¦204M	/data/disk1¢
+¤cText¦204M	/data/disk2¢
+¤cText¦204M	/data/disk3¢
+¤cText¦204M	/data/disk4¢
+¤cText¦204M	/data/disk5¢
+¤cText¦204M	/data/disk6¢
+¤cText¦204M	/data/disk7¢
+¤cText¦204M	/data/disk8¢
+¤cText¦part.1¢
+¤cText¦...¢

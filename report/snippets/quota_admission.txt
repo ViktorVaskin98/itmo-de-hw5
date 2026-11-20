@@ -1,0 +1,18 @@
+¤cPrompt¦PS> ¢¤cCmd¦kc apply -f k8s\40-quota.yaml¢
+¤cGood¦namespace/hw5-quota created¢
+¤cGood¦secret/s3-credentials created¢
+¤cGood¦resourcequota/hw5-quota created¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5-quota run bare --image=$Image --image-pull-policy=Never --restart=Never '--' python -c "print(1)"¢
+¤cBad¦Error from server (Forbidden): pods "bare" is forbidden: failed quota: hw5-quota: must specify limits.cpu for: bare;¢
+¤cText¦  limits.memory for: bare; requests.cpu for: bare; requests.memory for: bare¢
+¤cBad¦[exit code 1]¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc apply -f k8s\41-limitrange.yaml¢
+¤cGood¦limitrange/defaults created¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5-quota run bare --image=$Image --image-pull-policy=Never --restart=Never '--' python -c "print(1)"¢
+¤cGood¦pod/bare created¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5-quota get pod bare -o "jsonpath=¤textbraceleft¦¢.spec.containers[0].resources¤textbraceright¦¢"; ""¢
+¤cText¦¤textbraceleft¦¢"limits":¤textbraceleft¦¢"cpu":"500m","memory":"128Mi"¤textbraceright¦¢,"requests":¤textbraceleft¦¢"cpu":"250m","memory":"128Mi"¤textbraceright¦¢¤textbraceright¦¢¢

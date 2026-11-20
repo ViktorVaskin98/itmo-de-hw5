@@ -1,0 +1,12 @@
+¤cPrompt¦PS> ¢¤cCmd¦docker stop rustfs-lab¢
+¤cText¦rustfs-lab¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 1923 MiB, anon 286 MiB, memory.peak 1949 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.kube.plan --chunk-mb 32¢
+¤cText¦s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes, 26 splits x 32 MiB¢
+¤cText¦  m0000: bytes 0-33,554,432 (33,554,432)¢
+¤cText¦  m0001: bytes 33,554,432-67,108,864 (33,554,432)¢
+¤cText¦  m0025: bytes 838,860,800-847,619,384 (8,758,584)¢

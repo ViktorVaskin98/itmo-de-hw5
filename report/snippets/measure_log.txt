@@ -1,0 +1,20 @@
+¤cPrompt¦PS> ¢¤cCmd¦Show-Log hw5 job/hw3-measure-1¢
+¤cText¦[mem] pod hw3-measure-1-tg2hz: memory.max 2048 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174¢
+¤cText¦[mem]    0.0 s  current     18 MiB  anon     15  file     2  kernel    1¢
+¤cText¦[mem]    0.5 s  current     36 MiB  anon     33  file     2  kernel    1¢
+¤cText¦[mem]    1.0 s  current     51 MiB  anon     47  file     2  kernel    1¢
+¤cText¦[mem]    1.5 s  current     70 MiB  anon     64  file     2  kernel    4¢
+¤cText¦[mem]    2.0 s  current     73 MiB  anon     67  file     2  kernel    4¢
+¤cText¦[mem]    2.5 s  current     73 MiB  anon     67  file     2  kernel    4¢
+¤cText¦[mem]    3.0 s  current     73 MiB  anon     67  file     2  kernel    4¢
+¤cText¦[mem]    3.5 s  current     73 MiB  anon     67  file     2  kernel    4¢
+¤cText¦...¢
+¤cText¦[mem]   30.9 s  current     85 MiB  anon     78  file     2  kernel    5¢
+¤cText¦[mem] exit code 0, wall 31.3 s¢
+¤cParity¦[mem] peak: memory.peak 551 MiB; sampled every 0.1 s: current 550 MiB, anon 532 MiB, file 7 MiB¢
+¤cText¦[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦[cpu] usage 34.3 s over 31.3 s wall (1.10 CPU avg); throttled 16.2 s in 51 of 308 periods¢
+¤cText¦[mem-summary] ¤textbraceleft¦¢"pod": "hw3-measure-1-tg2hz", "exit": 0, "wall": 31.313452218018938, "memory_max": 2147483648,¢
+¤cText¦  "memory_peak": 577335296, "sampled": ¤textbraceleft¦¢"current": 576528384, "anon": 558186496, "file": 7290880¤textbraceright¦¢, "events": ¤textbraceleft¦¢"low":¢
+¤cParity¦  0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0¤textbraceright¦¢, "cpu_usage": 34.338123, "cpu_throttled":¢
+¤cText¦  16.236107¤textbraceright¦¢¢

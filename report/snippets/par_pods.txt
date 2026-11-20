@@ -1,0 +1,33 @@
+¤cPrompt¦PS> ¢¤cCmd¦Get-Content logs\pods\runs\par\par-map-7-*.log | Where-Object ¤textbraceleft¦¢ $_ -notmatch "^\[mem-json\]" ¤textbraceright¦¢¢
+¤cText¦[mem] pod par-map-7: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100¢
+¤cText¦[mem]    0.0 s  current     17 MiB  anon     15  file     1  kernel    1¢
+¤cText¦[map m0007 par-map-7] split 8/26: bytes 234,881,024-268,435,456 of s3://hh-lake/raw/it_vacancies_2024.csv¢
+¤cText¦[map m0007 par-map-7] stats ¤textbraceleft¦¢"split": 7, "attempt": 1, "bytes_fetched": 33619969, "cpu_seconds": 0.3468676260000003,¢
+¤cText¦  "lines": 9063, "parsed": 3211, "in_variant": 124, "with_skills": 98, "emitted": ¤textbraceleft¦¢"1": 578, "2": 2049, "3": 5948¤textbraceright¦¢,¢
+¤cText¦  "written": ¤textbraceleft¦¢"1": 188, "2": 1391, "3": 5290¤textbraceright¦¢¤textbraceright¦¢¢
+¤cText¦[map m0007 par-map-7] uploaded 142,015 bytes to s3://hh-lake/shuffle/par/m0007/; plan 0.48 s, map 1.29 s, upload 0.55¢
+¤cText¦  s¢
+¤cText¦[mem] exit code 0, wall 4.7 s¢
+¤cParity¦[mem] peak: memory.peak 83 MiB; sampled every 0.1 s: current 81 MiB, anon 72 MiB, file 4 MiB¢
+¤cText¦[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦[cpu] usage 3.2 s over 4.7 s wall (0.68 CPU avg); throttled 0.0 s in 2 of 48 periods¢
+¤cText¦[mem-summary] ¤textbraceleft¦¢"pod": "par-map-7", "exit": 0, "wall": 4.731105523009319, "memory_max": 134217728, "memory_peak":¢
+¤cText¦  86757376, "sampled": ¤textbraceleft¦¢"current": 85184512, "anon": 75403264, "file": 4620288¤textbraceright¦¢, "events": ¤textbraceleft¦¢"low": 0, "high": 0,¢
+¤cParity¦  "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0¤textbraceright¦¢, "cpu_usage": 3.212001, "cpu_throttled": 0.00685¤textbraceright¦¢¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Get-Content logs\pods\runs\par\par-reduce-0-*.log | Where-Object ¤textbraceleft¦¢ $_ -notmatch "^\[mem-json\]" ¤textbraceright¦¢¢
+¤cText¦[mem] pod par-reduce-0: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100¢
+¤cText¦[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1¢
+¤cText¦[reduce r000 par-reduce-0] fetched 78 partition files from 26 splits, 1,097,756 bytes¢
+¤cText¦[reduce r000 par-reduce-0] stack 1: 404 keys, 5,605 occurrences¢
+¤cText¦[reduce r000 par-reduce-0] stack 2: 4,145 keys, 13,090 occurrences¢
+¤cText¦[reduce r000 par-reduce-0] stack 3: 20,431 keys, 50,209 occurrences¢
+¤cText¦[reduce r000 par-reduce-0] wrote s3://hh-lake/results/k8s/par/*/part-r-00000.csv in 3.05 s¢
+¤cText¦[mem]    5.0 s  current     65 MiB  anon     60  file     1  kernel    4¢
+¤cText¦[mem] exit code 0, wall 5.1 s¢
+¤cParity¦[mem] peak: memory.peak 69 MiB; sampled every 0.1 s: current 69 MiB, anon 64 MiB, file 1 MiB¢
+¤cText¦[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦[cpu] usage 3.8 s over 5.1 s wall (0.74 CPU avg); throttled 0.3 s in 13 of 51 periods¢
+¤cText¦[mem-summary] ¤textbraceleft¦¢"pod": "par-reduce-0", "exit": 0, "wall": 5.100517235987354, "memory_max": 134217728, "memory_peak":¢
+¤cText¦  72847360, "sampled": ¤textbraceleft¦¢"current": 72658944, "anon": 67014656, "file": 1421312¤textbraceright¦¢, "events": ¤textbraceleft¦¢"low": 0, "high": 0,¢
+¤cParity¦  "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0¤textbraceright¦¢, "cpu_usage": 3.777413, "cpu_throttled": 0.321909¤textbraceright¦¢¢

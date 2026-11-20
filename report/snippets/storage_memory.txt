@@ -1,0 +1,19 @@
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 1923 MiB, anon 286 MiB, memory.peak 1949 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 3241 MiB, anon 1397 MiB, memory.peak 3243 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 3482 MiB, anon 1582 MiB, memory.peak 3508 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 3339 MiB, anon 1726 MiB, memory.peak 3796 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Storage-Memory¢
+¤cParity¦rustfs-0: restarts 0, memory.current 3870 MiB, anon 1886 MiB, memory.peak 4004 MiB, memory.max 4096 MiB, memory.events¢
+¤cText¦  low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,¢

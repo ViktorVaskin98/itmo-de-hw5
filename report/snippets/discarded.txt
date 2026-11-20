@@ -1,0 +1,10 @@
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 get pod rustfs-0 ...   # после 05_parallel¢
+¤cText¦RESTARTS   LAST        AT¢
+¤cBad¦1          OOMKilled   2026-11-20T15:46:20Z¢
+¤cText¦RESTARTS   LAST        AT¢
+¤cBad¦2          OOMKilled   2026-11-20T15:50:53Z¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Get-Content logs\discarded\run1\pods\par-map-21-mbsm2.log | Select-Object -Last 8¢
+¤cBad¦botocore.exceptions.IncompleteReadError: 29685929 read, but total bytes expected is 33619969.¢
+¤cText¦[mem] exit code 1, wall 3.8 s¢
+¤cText¦[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢

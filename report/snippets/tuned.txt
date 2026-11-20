@@ -1,0 +1,27 @@
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 get jobs -l hw5/stage=hw3-job -o "custom-columns=JOB:.metadata.name,SUCCEEDED:.status.succeeded,FAILED:.¢
+¤cPrompt¦    ¢¤cCmd¦    status.failed,START:.status.startTime,END:.status.completionTime"¢
+¤cVerb¦JOB             SUCCEEDED   FAILED   START                  END¢
+¤cText¦hw3-256mi       <none>      1        2026-11-20T18:38:02Z   <none>¢
+¤cText¦hw3-measure-1   1           <none>   2026-11-20T18:38:15Z   2026-11-20T18:38:51Z¢
+¤cText¦hw3-measure-2   1           <none>   2026-11-20T18:38:52Z   2026-11-20T18:39:30Z¢
+¤cText¦hw3-measure-3   1           <none>   2026-11-20T18:39:32Z   2026-11-20T18:40:20Z¢
+¤cText¦hw3-tuned-1     1           <none>   2026-11-20T18:40:24Z   2026-11-20T18:41:06Z¢
+¤cText¦hw3-tuned-2     1           <none>   2026-11-20T18:41:08Z   2026-11-20T18:41:48Z¢
+¤cText¦hw3-tuned-3     1           <none>   2026-11-20T18:41:51Z   2026-11-20T18:42:28Z¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.kube.sizing logs\pods\hw3\hw3-tuned-1 logs\pods\hw3\hw3-tuned-2 logs\pods\hw3\hw3-tuned-3¢
+¤cVerb¦pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled¢
+¤cText¦hw3-tuned-1-7s25b            704Mi     37.2      549 MiB    532      6    32.4     16.3 s¢
+¤cText¦hw3-tuned-2-xm8kx            704Mi     36.2      552 MiB    534      6    32.0      0.6 s¢
+¤cText¦hw3-tuned-3-7gjbr            704Mi     33.7      549 MiB    532      6    32.8      5.7 s¢
+¤cParity¦runs 3, memory.peak min 549 / median 549 / max 552 MiB¢
+¤cText¦limit = ceil(max peak 552 MiB x 1.2 / 64 MiB) x 64 MiB = 704Mi¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Select-String -Path logs\pods\hw3\hw3-tuned-*\*.log -Pattern "memory.events|\[cpu\]" | ForEach-Object ¤textbraceleft¦¢¢
+¤cPrompt¦    ¢¤cCmd¦    "$($_.Filename): $($_.Line)" ¤textbraceright¦¢¢
+¤cText¦hw3-tuned-1-7s25b.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦hw3-tuned-1-7s25b.log: [cpu] usage 32.4 s over 37.2 s wall (0.87 CPU avg); throttled 16.3 s in 48 of 364 periods¢
+¤cText¦hw3-tuned-2-xm8kx.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦hw3-tuned-2-xm8kx.log: [cpu] usage 32.0 s over 36.2 s wall (0.88 CPU avg); throttled 0.6 s in 37 of 354 periods¢
+¤cText¦hw3-tuned-3-7gjbr.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0¢
+¤cParity¦hw3-tuned-3-7gjbr.log: [cpu] usage 32.8 s over 33.7 s wall (0.98 CPU avg); throttled 5.7 s in 48 of 334 periods¢

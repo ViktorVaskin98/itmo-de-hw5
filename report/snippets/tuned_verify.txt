@@ -1,0 +1,21 @@
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.verify --a results/k8s/hw3-tuned-1 --b results/mapreduce --top 10¢
+¤cText¦A = MapReduce s3://hh-lake/results/k8s/hw3-tuned-1/¢
+¤cText¦B = MapReduce s3://hh-lake/results/mapreduce/¢
+¤cText¦variant vacancies: A 3,816 / B 3,816; with key_skills: A 2,951 / B 2,951  ¢¤cGood¦MATCH¢
+¤cVerb¦stack      A rows     A sum   B rows     B sum  only A  only B  diff¢
+¤cText¦skills      1,504    16,801    1,504    16,801       0       0     0  ¢¤cGood¦MATCH¢
+¤cText¦pairs      16,730    60,044   16,730    60,044       0       0     0  ¢¤cGood¦MATCH¢
+¤cText¦triples    82,458   200,072   82,458   200,072       0       0     0  ¢¤cGood¦MATCH¢
+¤cText¦top-10 pairs: A | B¢
+¤cText¦  1  c++ + linux  908            | c++ + linux  908            =¢
+¤cText¦  2  c/c++ + linux  611          | c/c++ + linux  611          =¢
+¤cText¦  3  git + linux  558            | git + linux  558            =¢
+¤cText¦  4  c++ + git  542              | c++ + git  542              =¢
+¤cText¦  5  c++ + qt  535               | c++ + qt  535               =¢
+¤cText¦  6  c++ + stl  411              | c++ + stl  411              =¢
+¤cText¦  7  linux + qt  326             | linux + qt  326             =¢
+¤cText¦  8  c++ + python  280           | c++ + python  280           =¢
+¤cText¦  9  c++ + ооп  280              | c++ + ооп  280              =¢
+¤cText¦ 10  c++ + sql  273              | c++ + sql  273              =¢
+¤cGood¦top-10 pairs identical¢
+¤cGood¦RESULT: all three stacks are identical¢

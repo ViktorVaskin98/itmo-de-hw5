@@ -1,0 +1,11 @@
+¤cPrompt¦PS> ¢¤cCmd¦Run-Hw3 hw3-measure-1 2Gi¢
+¤cGood¦job.batch/hw3-measure-1 created¢
+¤cGood¦job/hw3-measure-1 -> Complete¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.kube.sizing logs\pods\hw3\hw3-measure-1 logs\pods\hw3\hw3-measure-2 logs\pods\hw3\hw3-measure-3¢
+¤cVerb¦pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled¢
+¤cText¦hw3-measure-1-tg2hz         2048Mi     31.3      551 MiB    532      7    34.3     16.2 s¢
+¤cText¦hw3-measure-2-m9nn5         2048Mi     33.4      550 MiB    534      5    31.6     16.2 s¢
+¤cText¦hw3-measure-3-c9crc         2048Mi     43.4      550 MiB    532      7    36.2     15.3 s¢
+¤cParity¦runs 3, memory.peak min 550 / median 550 / max 551 MiB¢
+¤cText¦limit = ceil(max peak 551 MiB x 1.2 / 64 MiB) x 64 MiB = 704Mi¢

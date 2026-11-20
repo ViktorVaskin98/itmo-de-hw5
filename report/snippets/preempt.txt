@@ -1,0 +1,31 @@
+¤cPrompt¦PS> ¢¤cCmd¦kc get priorityclass -o¢
+¤cPrompt¦    ¢¤cCmd¦    "custom-columns=NAME:.metadata.name,VALUE:.value,PREEMPTION:.preemptionPolicy,GLOBAL_DEFAULT:.globalDefault"¢
+¤cVerb¦NAME                      VALUE        PREEMPTION             GLOBAL_DEFAULT¢
+¤cText¦batch-high                100000       PreemptLowerPriority   <none>¢
+¤cText¦batch-low                 1000         PreemptLowerPriority   <none>¢
+¤cText¦storage-critical          1000000      PreemptLowerPriority   <none>¢
+¤cText¦system-cluster-critical   2000000000   PreemptLowerPriority   <none>¢
+¤cText¦system-node-critical      2000001000   PreemptLowerPriority   <none>¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Wait-Running hw5 "hw5/run=low" 6¢
+¤cGood¦6 pods Running at 18:49:53 UTC¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Submit "10-hw3-job.yaml" $Urgent "urgent"; kc -n hw5 get job urgent -o "jsonpath=job urgent created¢
+¤cPrompt¦    ¢¤cCmd¦    ¤textbraceleft¦¢.metadata.creationTimestamp¤textbraceright¦¢"¢
+¤cGood¦job.batch/urgent created¢
+¤cGood¦job urgent created 2026-11-20T18:50:00Z¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Watch-Disruption hw5 "hw5/run=low" 10 "low"¢
+¤cBad¦2026-11-20T18:50:01Z low-map-2-w5zh2 on hw5-worker2, phase Running: DisruptionTarget PreemptionByScheduler -¢
+¤cText¦  default-scheduler: preempting to accommodate a higher priority pod¢
+¤cBad¦2026-11-20T18:50:00Z low-map-6-68j92 on hw5-worker2, phase Running: DisruptionTarget PreemptionByScheduler -¢
+¤cText¦  default-scheduler: preempting to accommodate a higher priority pod¢
+¤cBad¦low-map-2-w5zh2: last seen Failed, container exit code 143 (Error), finished 2026-11-20T18:50:02Z¢
+¤cBad¦low-map-6-68j92: last seen Failed, container exit code 143 (Error), finished 2026-11-20T18:50:01Z¢
+¤cText¦pods with DisruptionTarget: 2¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 get events --field-selector reason=Preempted -o¢
+¤cPrompt¦    ¢¤cCmd¦    "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,MESSAGE:.message"¢
+¤cVerb¦LAST                   POD               MESSAGE¢
+¤cBad¦2026-11-20T18:50:01Z   low-map-2-w5zh2   Preempted by pod b6fb7a72-3daf-4d22-af4e-04c98754e3c1 on node hw5-worker2¢
+¤cBad¦2026-11-20T18:50:00Z   low-map-6-68j92   Preempted by pod b6fb7a72-3daf-4d22-af4e-04c98754e3c1 on node hw5-worker2¢

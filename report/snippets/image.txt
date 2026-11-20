@@ -1,0 +1,32 @@
+¤cPrompt¦PS> ¢¤cCmd¦docker image ls $Image --format "¤textbraceleft¦¢¤textbraceleft¦¢.Repository¤textbraceright¦¢¤textbraceright¦¢:¤textbraceleft¦¢¤textbraceleft¦¢.Tag¤textbraceright¦¢¤textbraceright¦¢  ¤textbraceleft¦¢¤textbraceleft¦¢.ID¤textbraceright¦¢¤textbraceright¦¢  ¤textbraceleft¦¢¤textbraceleft¦¢.Size¤textbraceright¦¢¤textbraceright¦¢"¢
+¤cText¦hw5-hhlake:0.3.0  aa74212b14e4  600MB¢
+
+¤cPrompt¦PS> ¢¤cCmd¦docker run --rm $Image sh -c "du -sh /opt/venv; cd /opt/venv/lib/python3.13/site-packages; du -sh * | sort -h |¢
+¤cPrompt¦    ¢¤cCmd¦    tail -4"¢
+¤cText¦275M	/opt/venv¢
+¤cText¦2.7M	duckdb¢
+¤cText¦31M	botocore¢
+¤cText¦66M	_duckdb.abi3.so¢
+¤cText¦170M	pyarrow¢
+
+¤cPrompt¦PS> ¢¤cCmd¦docker run --rm $Image sh -c "id; python --version; python -c 'import boto3, duckdb, pyarrow;¢
+¤cPrompt¦    ¢¤cCmd¦    print(boto3.__version__, duckdb.__version__, pyarrow.__version__)'; python -m hhlake.mapreduce --help | head¢
+¤cPrompt¦    ¢¤cCmd¦    -3"¢
+¤cText¦uid=10001(hhlake) gid=10001(hhlake) groups=10001(hhlake)¢
+¤cText¦Python 3.13.18¢
+¤cText¦1.44.7 2.0.1 26.0.1¢
+¤cText¦usage: python -m hhlake.mapreduce [-h] [--bucket BUCKET] [--key KEY]¢
+¤cText¦                                  [--output OUTPUT] [--chunk-mb CHUNK_MB]¢
+¤cText¦                                  [--workers WORKERS] [--reducers REDUCERS]¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kind load docker-image $Image --name $Cluster¢
+¤cText¦Image: "hw5-hhlake:0.3.0" with ID "sha256:aa74212b14e4e1327fd13c03d63ddafe94d06bb9ee068b51a80ee283c2ccfd97" not yet¢
+¤cText¦  present on node "hw5-worker2", loading...¢
+¤cText¦Image: "hw5-hhlake:0.3.0" with ID "sha256:aa74212b14e4e1327fd13c03d63ddafe94d06bb9ee068b51a80ee283c2ccfd97" not yet¢
+¤cText¦  present on node "hw5-control-plane", loading...¢
+¤cText¦Image: "hw5-hhlake:0.3.0" with ID "sha256:aa74212b14e4e1327fd13c03d63ddafe94d06bb9ee068b51a80ee283c2ccfd97" not yet¢
+¤cText¦  present on node "hw5-worker", loading...¢
+
+¤cPrompt¦PS> ¢¤cCmd¦docker exec hw5-worker crictl images | Select-String "hhlake|IMAGE"¢
+¤cText¦IMAGE                                           TAG                  IMAGE ID            SIZE¢
+¤cText¦docker.io/library/hw5-hhlake                    0.3.0                eeae3e605ea28       153MB¢

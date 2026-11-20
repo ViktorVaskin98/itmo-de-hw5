@@ -1,0 +1,35 @@
+¤cPrompt¦PS> ¢¤cCmd¦Show-Job hw5 cpu-map¢
+¤cVerb¦JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END¢
+¤cText¦cpu-map   26            26          <none>   2026-11-20T18:48:24Z   2026-11-20T18:49:20Z¢
+¤cGood¦SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods¢
+¤cGood¦Complete=True CompletionsReached: Reached expected number of succeeded pods¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy tools\timeline.py logs\state\runs\cpu¢
+¤cVerb¦times in seconds from 18:48:24 UTC: created, scheduled, started, finished¢
+¤cVerb¦pod                     node          created  sched  start    end  pending  result¢
+¤cGood¦cpu-map-0-5p5s9         hw5-worker2         0      0      1      9       0s  Completed¢
+¤cGood¦cpu-map-1-8rjpk         hw5-worker          0      0      1      9       0s  Completed¢
+¤cGood¦cpu-map-2-652wm         hw5-worker          0      0      1      9       0s  Completed¢
+¤cGood¦cpu-map-3-8llh8         hw5-worker          0     11     12     18      11s  Completed¢
+¤cGood¦cpu-map-4-4vd9b         hw5-worker2         0     12     13     18      12s  Completed¢
+¤cGood¦cpu-map-5-99v7r         hw5-worker          0     11     12     18      11s  Completed¢
+¤cGood¦cpu-map-6-kj8l7         hw5-worker2         0      0      1      9       0s  Completed¢
+¤cGood¦cpu-map-7-l98nz         hw5-worker2         0     12     13     18      12s  Completed¢
+¤cText¦...¢
+¤cBad¦cpu/map: 26 pods (0 preempted), 53 s from first create to last finish, max 4 running at once, pending max 12 s / mean¢
+¤cText¦  6.5 s, nodes hw5-worker, hw5-worker2¢
+¤cBad¦cpu/reduce: 4 pods (0 preempted), 5 s from first create to last finish, max 4 running at once, pending max 0 s / mean¢
+¤cText¦  0.0 s, nodes hw5-worker, hw5-worker2¢
+¤cBad¦cpu/commit: 1 pods (0 preempted), 5 s from first create to last finish, max 1 running at once, pending max 0 s / mean¢
+¤cText¦  0.0 s, nodes hw5-worker¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy tools\timeline.py logs\state\runs\par --brief¢
+¤cBad¦par/map: 26 pods (0 preempted), 39 s from first create to last finish, max 6 running at once, pending max 12 s / mean¢
+¤cText¦  2.3 s, nodes hw5-worker, hw5-worker2¢
+¤cBad¦par/reduce: 4 pods (0 preempted), 7 s from first create to last finish, max 4 running at once, pending max 0 s / mean¢
+¤cText¦  0.0 s, nodes hw5-worker, hw5-worker2¢
+¤cBad¦par/commit: 1 pods (0 preempted), 6 s from first create to last finish, max 1 running at once, pending max 0 s / mean¢
+¤cText¦  0.0 s, nodes hw5-worker2¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Select-String -Path logs\pods\hw3\hw3-tuned-1\*.log -Pattern "\[cpu\]" | ForEach-Object Line¢
+¤cParity¦[cpu] usage 32.4 s over 37.2 s wall (0.87 CPU avg); throttled 16.3 s in 48 of 364 periods¢

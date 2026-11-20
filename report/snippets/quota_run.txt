@@ -1,0 +1,33 @@
+¤cPrompt¦PS> ¢¤cCmd¦Pods hw5-quota "hw5/run=quota"¢
+¤cVerb¦POD                 PRIORITY    PHASE     NODE          NOMINATED   CPU¢
+¤cGood¦quota-map-0-b7fjt   batch-low   Running   hw5-worker    <none>      1¢
+¤cGood¦quota-map-1-7mt7l   batch-low   Running   hw5-worker    <none>      1¢
+¤cGood¦quota-map-2-r7p75   batch-low   Running   hw5-worker2   <none>      1¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5-quota describe resourcequota hw5-quota¢
+¤cText¦Name:             hw5-quota¢
+¤cText¦Namespace:        hw5-quota¢
+¤cText¦Resource          Used   Hard¢
+¤cText¦--------          ----   ----¢
+¤cText¦count/jobs.batch  1      4¢
+¤cText¦limits.cpu        3      3¢
+¤cText¦limits.memory     384Mi  1Gi¢
+¤cText¦pods              3      10¢
+¤cText¦requests.cpu      3      3¢
+¤cText¦requests.memory   384Mi  1Gi¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5-quota get events --field-selector reason=FailedCreate -o¢
+¤cPrompt¦    ¢¤cCmd¦    "custom-columns=LAST:.lastTimestamp,OBJECT:.involvedObject.name,COUNT:.count,MESSAGE:.message" | Select-Object¢
+¤cPrompt¦    ¢¤cCmd¦    -First 4¢
+¤cVerb¦LAST                   OBJECT      COUNT   MESSAGE¢
+¤cBad¦2026-11-20T18:51:12Z   quota-map   1       Error creating: pods "quota-map-6-dpvg8" is forbidden: exceeded quota:¢
+¤cText¦  hw5-quota, requested: limits.cpu=1,requests.cpu=1, used: limits.cpu=3,requests.cpu=3, limited:¢
+¤cText¦  limits.cpu=3,requests.cpu=3¢
+¤cText¦...¢
+
+¤cPrompt¦PS> ¢¤cCmd¦foreach ($n in "hw5-worker", "hw5-worker2") ¤textbraceleft¦¢ "--- $n"; kc describe node $n | Select-String -Pattern "^\s+cpu\s" |¢
+¤cPrompt¦    ¢¤cCmd¦    Select-Object -Last 1 | ForEach-Object ¤textbraceleft¦¢ $_.Line.Trim() ¤textbraceright¦¢ ¤textbraceright¦¢¢
+¤cText¦--- hw5-worker¢
+¤cText¦cpu                2100m (52%)  2 (50%)¢
+¤cText¦--- hw5-worker2¢
+¤cText¦cpu                1100m (27%)  1 (25%)¢

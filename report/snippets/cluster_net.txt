@@ -1,0 +1,17 @@
+¤cPrompt¦PS> ¢¤cCmd¦docker network connect kind rustfs-lab; docker network inspect kind --format "¤textbraceleft¦¢¤textbraceleft¦¢range .Containers¤textbraceright¦¢¤textbraceright¦¢¤textbraceleft¦¢¤textbraceleft¦¢.Name¤textbraceright¦¢¤textbraceright¦¢¢
+¤cPrompt¦    ¢¤cCmd¦    ¤textbraceleft¦¢¤textbraceleft¦¢.IPv4Address¤textbraceright¦¢¤textbraceright¦¢¤textbraceleft¦¢¤textbraceleft¦¢println¤textbraceright¦¢¤textbraceright¦¢¤textbraceleft¦¢¤textbraceleft¦¢end¤textbraceright¦¢¤textbraceright¦¢"¢
+¤cText¦rustfs-lab 172.24.0.5/16¢
+¤cText¦hw5-control-plane 172.24.0.2/16¢
+¤cText¦hw5-worker 172.24.0.4/16¢
+¤cText¦hw5-worker2 172.24.0.3/16¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc run dnscheck --image=busybox:1.37 --restart=Never --command '--' sh -c "nslookup rustfs-lab. | tail -3; wget -q¢
+¤cPrompt¦    ¢¤cCmd¦    -O - http://rustfs-lab:9000/health"¢
+¤cGood¦pod/dnscheck created¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc logs dnscheck¢
+¤cText¦Name:	rustfs-lab¢
+¤cText¦Address: fc00:f853:ccd:e793::5¢
+
+¤cText¦¤textbraceleft¦¢"status":"ok","service":"rustfs-endpoint","timestamp":"2026-11-20T18:34:39.785946644Z[Etc/Unknown]","version":"1.0.1"¢
+¤cText¦  ¤textbraceright¦¢¢

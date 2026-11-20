@@ -1,0 +1,25 @@
+¤cPrompt¦PS> ¢¤cCmd¦Wait-Running hw5 "hw5/run=par" 6¢
+¤cGood¦6 pods Running at 18:47:05 UTC¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc describe node hw5-worker | Select-String -Pattern "Non-terminated Pods:" -Context 0,10¢
+¤cText¦> Non-terminated Pods:          (5 in total)¢
+¤cText¦    Namespace                   Name                CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age¢
+¤cText¦    ---------                   ----                ------------  ----------  ---------------  -------------  ---¢
+¤cText¦    hw5                         par-map-1-48ccn     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s¢
+¤cText¦    hw5                         par-map-2-l6tzs     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s¢
+¤cText¦    hw5                         par-map-3-28m2t     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s¢
+¤cText¦    kube-system                 kindnet-twlvr       100m (2%)     0 (0%)      50Mi (2%)        0 (0%)         12m¢
+¤cText¦    kube-system                 kube-proxy-b9p2f    0 (0%)        0 (0%)      0 (0%)           0 (0%)         12m¢
+¤cText¦  Allocated resources:¢
+¤cText¦    (Total limits may be over 100 percent, i.e., overcommitted.)¢
+¤cText¦    Resource           Requests     Limits¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Show-Job hw5 par-map; Show-Job hw5 par-reduce¢
+¤cVerb¦JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END¢
+¤cText¦par-map   26            26          <none>   2026-11-20T18:47:03Z   2026-11-20T18:47:44Z¢
+¤cGood¦SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods¢
+¤cGood¦Complete=True CompletionsReached: Reached expected number of succeeded pods¢
+¤cVerb¦JOB          COMPLETIONS   SUCCEEDED   FAILED   START                  END¢
+¤cText¦par-reduce   4             4           <none>   2026-11-20T18:47:45Z   2026-11-20T18:47:55Z¢
+¤cGood¦SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods¢
+¤cGood¦Complete=True CompletionsReached: Reached expected number of succeeded pods¢

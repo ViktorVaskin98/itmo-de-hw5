@@ -1,0 +1,28 @@
+¤cPrompt¦PS> ¢¤cCmd¦Pods hw5 "hw5/run=cpu" | Select-Object -First 10¢
+¤cVerb¦POD               PRIORITY    PHASE     NODE          NOMINATED   CPU¢
+¤cGood¦cpu-map-0-5p5s9   batch-low   Running   hw5-worker2   <none>      1500m¢
+¤cGood¦cpu-map-1-8rjpk   batch-low   Running   hw5-worker    <none>      1500m¢
+¤cGood¦cpu-map-2-652wm   batch-low   Running   hw5-worker    <none>      1500m¢
+¤cParity¦cpu-map-3-8llh8   batch-low   Pending   <none>        <none>      1500m¢
+¤cParity¦cpu-map-4-4vd9b   batch-low   Pending   <none>        <none>      1500m¢
+¤cParity¦cpu-map-5-99v7r   batch-low   Pending   <none>        <none>      1500m¢
+¤cGood¦cpu-map-6-kj8l7   batch-low   Running   hw5-worker2   <none>      1500m¢
+¤cParity¦cpu-map-7-l98nz   batch-low   Pending   <none>        <none>      1500m¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 get events --field-selector reason=FailedScheduling -o¢
+¤cPrompt¦    ¢¤cCmd¦    "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,COUNT:.count,MESSAGE:.message" | Select-Object¢
+¤cPrompt¦    ¢¤cCmd¦    -First 5¢
+¤cVerb¦LAST                   POD                  COUNT   MESSAGE¢
+¤cText¦2026-11-20T18:48:24Z   cpu-map-3-8llh8      1       0/3 nodes are available: 1 node(s) had untolerated taint(s), 2¢
+¤cBad¦  Insufficient cpu. no new claims to deallocate, preemption: 0/3 nodes are available: 1 Preemption is not helpful for¢
+¤cText¦  scheduling, 2 No preemption victims found for incoming pod.¢
+¤cText¦...¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc describe node hw5-worker | Select-String -Pattern "Allocated resources:" -Context 0,6¢
+¤cText¦> Allocated resources:¢
+¤cText¦    (Total limits may be over 100 percent, i.e., overcommitted.)¢
+¤cText¦    Resource           Requests     Limits¢
+¤cText¦    --------           --------     ------¢
+¤cText¦    cpu                3100m (77%)  3 (75%)¢
+¤cText¦    memory             306Mi (12%)  256Mi (10%)¢
+¤cText¦    ephemeral-storage  0 (0%)       0 (0%)¢

@@ -1,0 +1,14 @@
+¤cPrompt¦PS> ¢¤cCmd¦Run-Hw3 hw3-below 512Mi¢
+¤cGood¦job.batch/hw3-below created¢
+¤cBad¦job/hw3-below -> Failed¢
+
+¤cPrompt¦PS> ¢¤cCmd¦kc -n hw5 get pods -l hw5/run=hw3-below -o "custom-columns=POD:.metadata.name,NODE:.spec.nodeName,REASON:.status.c¢
+¤cPrompt¦    ¢¤cCmd¦    ontainerStatuses[0].state.terminated.reason,EXIT:.status.containerStatuses[0].state.terminated.exitCode"¢
+¤cVerb¦POD               NODE         REASON      EXIT¢
+¤cBad¦hw3-below-blgwl   hw5-worker   OOMKilled   137¢
+
+¤cPrompt¦PS> ¢¤cCmd¦Kernel-Oom $oomNode "hw3-below" | Select-Object -First 3¢
+¤cBad¦[428486.810014] python invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=933¢
+¤cText¦[428486.811970] memory: usage 524288kB, limit 524288kB, failcnt 146¢
+¤cBad¦[428486.812708] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=cri-containerd-eb703f9e526a79d9f51e090894e¢
+¤cText¦  759dc477ae0859443ae6155603c037a117114.scope,mems_al...¢

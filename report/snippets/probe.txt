@@ -1,0 +1,25 @@
+¤cPrompt¦PS> ¢¤cCmd¦Complete-Run $probe¢
+¤cGood¦map: Complete¢
+¤cGood¦job.batch/probe-reduce created¢
+¤cGood¦reduce: Complete¢
+¤cGood¦job.batch/probe-commit created¢
+¤cGood¦commit: Complete¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.kube.sizing (Get-ChildItem logs\pods\runs\probe\probe-map-*.log).FullName¢
+¤cVerb¦pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled¢
+¤cText¦probe-map-0                  512Mi     11.8       81 MiB     72      3     5.3      0.1 s¢
+¤cText¦probe-map-1                  512Mi     12.0       79 MiB     72      2     5.2      0.0 s¢
+¤cText¦probe-map-10                 512Mi      4.4       78 MiB     72      0     2.9      0.0 s¢
+¤cText¦probe-map-11                 512Mi      7.0       80 MiB     72      2     5.0      0.0 s¢
+¤cText¦...¢
+¤cParity¦runs 26, memory.peak min 77 / median 79 / max 82 MiB¢
+¤cText¦limit = ceil(max peak 82 MiB x 1.2 / 64 MiB) x 64 MiB = 128Mi¢
+
+¤cPrompt¦PS> ¢¤cCmd¦uvpy -m hhlake.kube.sizing (Get-ChildItem logs\pods\runs\probe\probe-reduce-*.log).FullName¢
+¤cVerb¦pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled¢
+¤cText¦probe-reduce-0               512Mi      4.2       69 MiB     64      1     2.9      0.0 s¢
+¤cText¦probe-reduce-1               512Mi      4.3       71 MiB     64      2     3.0      0.0 s¢
+¤cText¦probe-reduce-2               512Mi      4.7       71 MiB     64      2     3.0      0.1 s¢
+¤cText¦probe-reduce-3               512Mi      4.6       70 MiB     64      1     3.0      0.2 s¢
+¤cParity¦runs 4, memory.peak min 69 / median 71 / max 71 MiB¢
+¤cText¦limit = ceil(max peak 71 MiB x 1.2 / 64 MiB) x 64 MiB = 128Mi¢
