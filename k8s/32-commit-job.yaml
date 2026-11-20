@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${RUN}-commit
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: hhlake
+    hw5/run: ${RUN}
+    hw5/stage: commit
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhlake
+        hw5/run: ${RUN}
+        hw5/stage: commit
+    spec:
+      restartPolicy: Never
+      priorityClassName: ${PRIORITY}
+      nodeSelector:
+        hw5/pool: batch
+      containers:
+        - name: commit
+          image: hw5-hhlake:0.3.0
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - >-
+              python -m hhlake.kube.commit --run ${RUN} --chunk-mb ${CHUNK_MB} --reducers ${REDUCERS} &&
+              python -m hhlake.verify --a results/k8s/${RUN} --b results/hw3/mapreduce --top 10
+          env:
+            - name: S3_ENDPOINT
+              value: http://rustfs.hw5.svc.cluster.local:9000
+          envFrom:
+            - secretRef:
+                name: s3-credentials
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

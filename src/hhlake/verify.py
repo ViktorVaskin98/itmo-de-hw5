@@ -70,6 +70,21 @@ def compare(con: duckdb.DuckDBPyConnection, a: Result, b: Result, k: int) -> dic
     return {"stack": name, **dict(zip(fields, row, strict=True))}
 
 
+def top(con: duckdb.DuckDBPyConnection, r: Result, k: int, n: int) -> list[tuple]:
+    keys = ", ".join(f"skill{i}" for i in range(1, k + 1))
+    rel = _reader(r.uri(STACK_NAMES[k]), k)
+    return con.sql(f"SELECT {keys}, vacancies FROM {rel} ORDER BY vacancies DESC, {keys} LIMIT {n}").fetchall()
+
+
+def print_top(con: duckdb.DuckDBPyConnection, a: Result, b: Result, n: int) -> bool:
+    ta, tb = top(con, a, 2, n), top(con, b, 2, n)
+    print(f"top-{n} pairs: A | B")
+    for i, (x, y) in enumerate(zip(ta, tb, strict=True), 1):
+        left, right = f"{x[0]} + {x[1]}  {x[2]}", f"{y[0]} + {y[1]}  {y[2]}"
+        print(f"{i:>3}  {left:<28}| {right:<28}{'=' if x == y else 'DIFFERENT'}")
+    return ta == tb
+
+
 def export(con: duckdb.DuckDBPyConnection, a: Result, out: Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
     for k, name in STACK_NAMES.items():
@@ -86,6 +101,7 @@ def main() -> None:
     p.add_argument("--a", default="results/mapreduce")
     p.add_argument("--b", default="results/duckdb")
     p.add_argument("--export", type=Path, help="save A as one sorted csv per stack size")
+    p.add_argument("--top", type=int, default=0, help="print top-N pairs of A and B side by side")
     args = p.parse_args()
 
     con = connect()
@@ -107,6 +123,10 @@ def main() -> None:
             f"{r['stack']:<8}{r['a_rows']:>9,}{r['a_sum']:>10,}{r['b_rows']:>9,}{r['b_sum']:>10,}"
             f"{r['only_a']:>8}{r['only_b']:>8}{r['count_diff']:>6}  {'MATCH' if same else 'MISMATCH'}"
         )
+    if args.top:
+        same_top = print_top(con, a, b, args.top)
+        print(f"top-{args.top} pairs {'identical' if same_top else 'DIFFERENT'}")
+        ok &= same_top
     print("RESULT:", "all three stacks are identical" if ok else "MISMATCH")
     if args.export:
         export(con, a, args.export)
