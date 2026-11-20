@@ -7,7 +7,7 @@ Note "Этап 2. RustFS из ДЗ 2 внутри кластера: тот же 
 Step { Get-Content k8s\20-rustfs.yaml | Select-Object -First 70 }
 Step { kc apply -f k8s\00-namespace.yaml -f k8s\05-priority.yaml -f k8s\20-rustfs.yaml }
 Step { kc -n hw5 rollout status statefulset/rustfs --timeout=300s }
-Step { kc -n hw5 get statefulset,pod,svc -o wide }
+Step { kc -n hw5 get "statefulset,pod,svc" -o wide }
 Step { kc -n hw5 get pvc -o "custom-columns=PVC:.metadata.name,STATUS:.status.phase,SIZE:.status.capacity.storage,CLASS:.spec.storageClassName,VOLUME:.spec.volumeName" }
 Step { kc get pv -o "custom-columns=PV:.metadata.name,CLAIM:.spec.claimRef.name,NODE:.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].values[0],PATH:.spec.hostPath.path" }
 Step { kc -n hw5 logs rustfs-0 }

@@ -35,6 +35,8 @@ spec:
             - python
             - -m
             - hhlake.kube.memwatch
+            - --report-every
+            - "0.5"
             - --
             - python
             - -m

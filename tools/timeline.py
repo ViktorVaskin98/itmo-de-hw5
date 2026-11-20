@@ -41,6 +41,11 @@ def load(dirs: list[Path]) -> list[PodSpan]:
     spans = []
     for d in dirs:
         items = json.loads((d / "pods.json").read_text(encoding="utf-8-sig"))["items"]
+        names = {i["metadata"]["name"] for i in items}
+        extra = d / "disrupted.json"
+        if extra.exists():
+            gone = json.loads(extra.read_text(encoding="utf-8-sig"))["items"]
+            items += [i for i in gone if i["metadata"]["name"] not in names]
         for pod in items:
             meta, status = pod["metadata"], pod["status"]
             scheduled = _condition(pod, "PodScheduled")

@@ -3,10 +3,11 @@ $ErrorActionPreference = "Continue"
 Set-Location $Root
 
 Start-Log "02_image"
-Note "Образ с программой из ДЗ 3: python 3.13-slim + uv, зависимости по uv.lock, пользователь uid 10001"
+Note "Образ с программой из ДЗ 3: две стадии - в первой uv ставит зависимости по uv.lock и пакет в /opt/venv, во вторую копируется только /opt/venv; пользователь uid 10001"
 Step { Get-Content Dockerfile }
 Step { docker build -q -t $Image . }
 Step { docker image ls $Image --format "{{.Repository}}:{{.Tag}}  {{.ID}}  {{.Size}}" }
+Step { docker run --rm $Image sh -c "du -sh /opt/venv /opt/venv/lib/python3.13/site-packages/pyarrow /opt/venv/lib/python3.13/site-packages/_duckdb.abi3.so" }
 Step { docker run --rm $Image sh -c "id; python --version; python -c 'import boto3, duckdb, pyarrow; print(boto3.__version__, duckdb.__version__, pyarrow.__version__)'; python -m hhlake.mapreduce --help | head -3" }
 
 Note "Реестра нет: образ копируется прямо в containerd узлов, в манифестах imagePullPolicy: Never"

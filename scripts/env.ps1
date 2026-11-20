@@ -63,7 +63,7 @@ function Finish {
 }
 
 function Stamp {
-    (Get-Date).ToString("HH:mm:ss")
+    (Get-Date).ToUniversalTime().ToString("HH:mm:ss") + " UTC"
 }
 
 function Render([string]$Template, [hashtable]$Vars, [string]$Name) {
@@ -182,6 +182,32 @@ function Pods([string]$Namespace, [string]$Selector) {
 
 function Storage-Memory {
     $restarts = & kubectl --context $script:Ctx -n hw5 get pod rustfs-0 -o "jsonpath={.status.containerStatuses[0].restartCount}" 2>$null
-    $cmd = 'm=/sys/fs/cgroup; set -- $(head -1 $m/memory.stat); echo rustfs-0: restarts RS, memory.current $(( $(cat $m/memory.current) >> 20 )) MiB, anon $(( $2 >> 20 )) MiB, memory.peak $(( $(cat $m/memory.peak) >> 20 )) MiB, memory.max $(( $(cat $m/memory.max) >> 20 )) MiB'
+    $cmd = 'm=/sys/fs/cgroup; set -- $(head -1 $m/memory.stat); echo rustfs-0: restarts RS, memory.current $(( $(cat $m/memory.current) >> 20 )) MiB, anon $(( $2 >> 20 )) MiB, memory.peak $(( $(cat $m/memory.peak) >> 20 )) MiB, memory.max $(( $(cat $m/memory.max) >> 20 )) MiB, memory.events $(tr \\n , < $m/memory.events)'
     kc -n hw5 exec rustfs-0 '--' sh -c $cmd.Replace("RS", "$restarts")
+}
+
+function Watch-Disruption([string]$Namespace, [string]$Selector, [int]$Seconds, [string]$Name) {
+    $seen = @{}
+    $deadline = (Get-Date).AddSeconds($Seconds)
+    while ((Get-Date) -lt $deadline) {
+        $raw = & kubectl --context $script:Ctx -n $Namespace get pods -l $Selector -o json 2>$null | Out-String
+        foreach ($pod in ($raw | ConvertFrom-Json).items) {
+            $cond = $pod.status.conditions | Where-Object { $_.type -eq "DisruptionTarget" -and $_.status -eq "True" }
+            if (-not $cond) { continue }
+            if (-not $seen.ContainsKey($pod.metadata.name)) {
+                "$($cond.lastTransitionTime) $($pod.metadata.name) on $($pod.spec.nodeName), phase $($pod.status.phase): DisruptionTarget $($cond.reason) - $($cond.message)"
+            }
+            $seen[$pod.metadata.name] = $pod
+        }
+        Start-Sleep -Milliseconds 250
+    }
+    foreach ($pod in $seen.Values) {
+        $term = $pod.status.containerStatuses[0].state.terminated
+        if ($term) { "$($pod.metadata.name): last seen $($pod.status.phase), container exit code $($term.exitCode) ($($term.reason)), finished $($term.finishedAt)" }
+        else { "$($pod.metadata.name): last seen $($pod.status.phase), container still stopping" }
+    }
+    $dir = Join-Path $script:LogDir "state\runs\$Name"
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    @{ items = @($seen.Values) } | ConvertTo-Json -Depth 30 | Set-Content (Join-Path $dir "disrupted.json") -Encoding utf8
+    "pods with DisruptionTarget: $($seen.Count)"
 }
