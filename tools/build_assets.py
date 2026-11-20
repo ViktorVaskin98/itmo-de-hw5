@@ -198,7 +198,7 @@ def build_snippets() -> None:
     for f in sorted((LOGS / "pods" / "runs" / "low").glob("low-map-*.log")):
         lines = f.read_text(encoding="utf-8-sig").splitlines()
         if any("got signal" in ln for ln in lines):
-            keep = [ln for ln in lines if not ln.startswith(("[mem-json]", "[mem] ", "  ", "Traceback", "File"))]
+            keep = [ln for ln in lines if ln.startswith("[map ")]
             keep += [ln for ln in lines if ln.startswith(("[mem] got signal", "[mem] exit code"))]
             victim_logs.append((Block([f"Get-Content logs\\pods\\runs\\low\\{f.name}"], keep), {}))
     snippet("preempt_victim", victim_logs[:1])
@@ -368,6 +368,9 @@ def values() -> dict[str, str]:
 
     kernel = find(LOGS / "03_memory.txt", r"Kernel-Oom \$oomNode \"hw3-256mi\"").output
     v["oomKilled"] = str(sum("Killed process" in line for line in kernel))
+    vms = [int(m[1]) for line in kernel if (m := re.search(r"Killed process \d+ \(\S+\) total-vm:(\d+)kB", line))]
+    v["oomWorkers"] = str(sum(150_000 < vm < 230_000 for vm in vms))
+    v["oomJemalloc"] = str(sum("(jemalloc_bg_thd)" in line for line in kernel))
     m = re.search(r"oom_score_adj=(\d+)", " ".join(kernel))
     v["oomScoreAdj"] = m[1] if m else "?"
 
@@ -390,6 +393,15 @@ def values() -> dict[str, str]:
 
     quota = stage(spans("quota"), "map")
     v["quotaMaxRun"] = str(max_concurrent(quota))
+    waves: dict[object, list[PodSpan]] = {}
+    for s in quota:
+        waves.setdefault(s.created, []).append(s)
+    over = [ws for ws in waves.values() if len(ws) > 3]
+    v["quotaOverCount"] = str(len(over))
+    v["quotaOverAt"] = ", ".join(f"{ws[0].created:%H:%M:%S}" for ws in over) or "-"
+    memory_log = (LOGS / "03_memory.txt").read_text(encoding="utf-8-sig")
+    clean = re.search(r"removed (\d+) old objects in ([\d.]+) s", memory_log)
+    v["cleanCount"], v["cleanSecs"] = clean[1], fmt(float(clean[2]))  # type: ignore[index]
     v["quotaMapSpan"] = fmt(span_seconds(quota))
     events = json.loads((LOGS / "state" / "runs" / "quota" / "events.json").read_text(encoding="utf-8-sig"))["items"]
     v["quotaFailedCreate"] = str(sum(e.get("count", 1) for e in events if e["reason"] == "FailedCreate"))
