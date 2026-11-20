@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: quota-map
+  namespace: hw5-quota
+  labels:
+    app.kubernetes.io/name: hhlake
+    hw5/run: quota
+    hw5/stage: map
+spec:
+  completionMode: Indexed
+  completions: 26
+  parallelism: 8
+  backoffLimitPerIndex: 2
+  maxFailedIndexes: 0
+  podFailurePolicy:
+    rules:
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+      - action: FailIndex
+        onExitCodes:
+          containerName: map
+          operator: In
+          values: [137]
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhlake
+        hw5/run: quota
+        hw5/stage: map
+    spec:
+      restartPolicy: Never
+      priorityClassName: batch-low
+      nodeSelector:
+        hw5/pool: batch
+      containers:
+        - name: map
+          image: hw5-hhlake:0.3.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - -m
+            - hhlake.kube.memwatch
+            - --report-every
+            - "5"
+            - --
+            - python
+            - -m
+            - hhlake.kube.maptask
+            - --run
+            - quota
+            - --chunk-mb
+            - "32"
+            - --reducers
+            - "4"
+          env:
+            - name: S3_ENDPOINT
+              value: http://rustfs.hw5.svc.cluster.local:9000
+          envFrom:
+            - secretRef:
+                name: s3-credentials
+          resources:
+            requests:
+              cpu: "1"
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 128Mi
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: work
+          emptyDir: {}

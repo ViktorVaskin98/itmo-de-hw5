@@ -1,0 +1,15 @@
+﻿[mem] pod par-reduce-1: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     15 MiB  anon     15  file     0  kernel    0
+[mem-json] {"t": 0.0, "current": 16097280, "anon": 15249408, "file": 24576, "kernel": 503808}
+[reduce r001 par-reduce-1] fetched 78 partition files from 26 splits, 1,090,316 bytes
+[reduce r001 par-reduce-1] stack 1: 354 keys, 2,727 occurrences
+[reduce r001 par-reduce-1] stack 2: 4,103 keys, 15,300 occurrences
+[reduce r001 par-reduce-1] stack 3: 20,669 keys, 49,551 occurrences
+[reduce r001 par-reduce-1] wrote s3://hh-lake/results/k8s/par/*/part-r-00001.csv in 3.25 s
+[mem]    5.1 s  current     41 MiB  anon     18  file     1  kernel    4
+[mem-json] {"t": 5.09, "current": 42532864, "anon": 18595840, "file": 1437696, "kernel": 3948544}
+[mem] exit code 0, wall 5.1 s
+[mem] peak: memory.peak 70 MiB; sampled every 0.1 s: current 70 MiB, anon 64 MiB, file 1 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.4 s over 5.1 s wall (0.67 CPU avg); throttled 0.2 s in 11 of 49 periods
+[mem-summary] {"pod": "par-reduce-1", "exit": 0, "wall": 5.093784348980989, "memory_max": 134217728, "memory_peak": 73150464, "sampled": {"current": 73015296, "anon": 67346432, "file": 1437696}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.436995, "cpu_throttled": 0.152234}

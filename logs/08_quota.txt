@@ -1,0 +1,175 @@
+﻿
+# Этап 4в. Квота пространства имён hw5-quota: 3 CPU и 1Gi на всё пространство, хотя на воркерах для заданий есть 7,8 CPU
+
+PS> Get-Content k8s\40-quota.yaml | Select-Object -Skip 18
+kind: ResourceQuota
+metadata:
+  name: hw5-quota
+  namespace: hw5-quota
+spec:
+  hard:
+    requests.cpu: "3"
+    limits.cpu: "3"
+    requests.memory: 1Gi
+    limits.memory: 1Gi
+    pods: "10"
+    count/jobs.batch: "4"
+
+PS> kc apply -f k8s\40-quota.yaml
+namespace/hw5-quota created
+secret/s3-credentials created
+resourcequota/hw5-quota created
+
+PS> kc -n hw5-quota describe resourcequota hw5-quota
+Name:             hw5-quota
+Namespace:        hw5-quota
+Resource          Used  Hard
+--------          ----  ----
+count/jobs.batch  0     4
+limits.cpu        0     3
+limits.memory     0     1Gi
+pods              0     10
+requests.cpu      0     3
+requests.memory   0     1Gi
+
+# Под без requests/limits в пространстве с квотой на cpu и memory не принимается
+
+PS> kc -n hw5-quota run bare --image=$Image --image-pull-policy=Never --restart=Never '--' python -c "print(1)"
+Error from server (Forbidden): pods "bare" is forbidden: failed quota: hw5-quota: must specify limits.cpu for: bare; limits.memory for: bare; requests.cpu for: bare; requests.memory for: bare
+[exit code 1]
+
+# LimitRange подставляет значения по умолчанию - тот же под проходит
+
+PS> kc apply -f k8s\41-limitrange.yaml
+limitrange/defaults created
+
+PS> kc -n hw5-quota run bare --image=$Image --image-pull-policy=Never --restart=Never '--' python -c "print(1)"
+pod/bare created
+
+PS> kc -n hw5-quota get pod bare -o "jsonpath={.spec.containers[0].resources}"; ""
+{"limits":{"cpu":"500m","memory":"128Mi"},"requests":{"cpu":"250m","memory":"128Mi"}}
+
+PS> kc -n hw5-quota delete pod bare --wait=true
+pod "bare" deleted from hw5-quota namespace
+
+# Map из 26 сплитов с parallelism 8 по 1 CPU: квота пропускает три пода одновременно
+
+PS> Start-Map $quota
+job.batch/quota-map created
+
+PS> Wait-Running hw5-quota "hw5/run=quota" 3
+3 pods Running at 18:51:15 UTC
+
+PS> Pods hw5-quota "hw5/run=quota"
+POD                 PRIORITY    PHASE     NODE          NOMINATED   CPU
+quota-map-0-b7fjt   batch-low   Running   hw5-worker    <none>      1
+quota-map-1-7mt7l   batch-low   Running   hw5-worker    <none>      1
+quota-map-2-r7p75   batch-low   Running   hw5-worker2   <none>      1
+
+PS> foreach ($n in "hw5-worker", "hw5-worker2") { "--- $n"; kc describe node $n | Select-String -Pattern "^\s+cpu\s" | Select-Object -Last 1 | ForEach-Object { $_.Line.Trim() } }
+--- hw5-worker
+cpu                2100m (52%)  2 (50%)
+--- hw5-worker2
+cpu                1100m (27%)  1 (25%)
+
+PS> kc -n hw5-quota describe resourcequota hw5-quota
+Name:             hw5-quota
+Namespace:        hw5-quota
+Resource          Used   Hard
+--------          ----   ----
+count/jobs.batch  1      4
+limits.cpu        3      3
+limits.memory     384Mi  1Gi
+pods              3      10
+requests.cpu      3      3
+requests.memory   384Mi  1Gi
+
+PS> kc -n hw5-quota get events --field-selector reason=FailedCreate -o "custom-columns=LAST:.lastTimestamp,OBJECT:.involvedObject.name,COUNT:.count,MESSAGE:.message" | Select-Object -First 4
+LAST                   OBJECT      COUNT   MESSAGE
+2026-11-20T18:51:12Z   quota-map   1       Error creating: pods "quota-map-6-dpvg8" is forbidden: exceeded quota: hw5-quota, requested: limits.cpu=1,requests.cpu=1, used: limits.cpu=3,requests.cpu=3, limited: limits.cpu=3,requests.cpu=3
+2026-11-20T18:51:12Z   quota-map   1       Error creating: pods "quota-map-5-d99hs" is forbidden: exceeded quota: hw5-quota, requested: limits.cpu=1,requests.cpu=1, used: limits.cpu=3,requests.cpu=3, limited: limits.cpu=3,requests.cpu=3
+2026-11-20T18:51:12Z   quota-map   1       Error creating: pods "quota-map-3-95qln" is forbidden: exceeded quota: hw5-quota, requested: limits.cpu=1,requests.cpu=1, used: limits.cpu=3,requests.cpu=3, limited: limits.cpu=3,requests.cpu=3
+
+PS> Complete-Run $quota
+map: Complete
+job.batch/quota-reduce created
+reduce: Complete
+job.batch/quota-commit created
+commit: Complete
+
+PS> Show-Job hw5-quota quota-map
+JOB         COMPLETIONS   SUCCEEDED   FAILED   START                  END
+quota-map   26            26          <none>   2026-11-20T18:51:12Z   2026-11-20T18:52:28Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+
+PS> uvpy tools\timeline.py logs\state\runs\quota
+times in seconds from 18:51:12 UTC: created, scheduled, started, finished
+pod                     node          created  sched  start    end  pending  result
+quota-map-0-b7fjt       hw5-worker          0      0      1      7       0s  Completed
+quota-map-1-7mt7l       hw5-worker          0      0      1      7       0s  Completed
+quota-map-2-r7p75       hw5-worker2         0      0      1      7       0s  Completed
+quota-map-3-xnl9q       hw5-worker2         9      9     10     16       0s  Completed
+quota-map-4-hz96s       hw5-worker          9      9     10     16       0s  Completed
+quota-map-5-wjsbh       hw5-worker          9      9     10     16       0s  Completed
+quota-map-6-z8qg2       hw5-worker2        19     19     20     25       0s  Completed
+quota-map-7-s25gd       hw5-worker2        19     19     20     25       0s  Completed
+quota-map-8-gbtws       hw5-worker         19     19     20     25       0s  Completed
+quota-map-10-qk8wn      hw5-worker         27     27     28     33       0s  Completed
+quota-map-11-7jsnw      hw5-worker2        27     27     28     33       0s  Completed
+quota-map-9-2rs6b       hw5-worker         27     27     28     32       0s  Completed
+quota-map-12-7fm5w      hw5-worker2        35     35     36     40       0s  Completed
+quota-map-14-st242      hw5-worker         35     35     36     41       0s  Completed
+quota-map-13-n4tzp      hw5-worker2        36     36     37     41       0s  Completed
+quota-map-15-hfrd4      hw5-worker2        43     43     44     49       0s  Completed
+quota-map-16-jc82z      hw5-worker         43     43     44     49       0s  Completed
+quota-map-17-98mtd      hw5-worker         43     43     44     49       0s  Completed
+quota-map-18-72b27      hw5-worker2        51     51     52     57       0s  Completed
+quota-map-19-nrg4m      hw5-worker         51     51     52     57       0s  Completed
+quota-map-20-6btq8      hw5-worker         51     51     52     57       0s  Completed
+quota-map-21-shksw      hw5-worker         60     60     61     66       0s  Completed
+quota-map-22-gq2mg      hw5-worker         60     60     61     66       0s  Completed
+quota-map-23-pjkrl      hw5-worker2        60     60     61     66       0s  Completed
+quota-map-24-5zxzs      hw5-worker         69     69     70     74       0s  Completed
+quota-map-25-clzdf      hw5-worker2        69     69     70     74       0s  Completed
+quota-reduce-0-bb6cf    hw5-worker         77     77     78     84       0s  Completed
+quota-reduce-1-t65t8    hw5-worker2        77     77     78     84       0s  Completed
+quota-reduce-2-5qk29    hw5-worker2        77     77     78     84       0s  Completed
+quota-reduce-3-thx2h    hw5-worker2        87     87     88     91       0s  Completed
+quota-commit-6bcg9      hw5-worker2        94     94     95    104       0s  Completed
+quota/map: 26 pods (0 preempted), 74 s from first create to last finish, max 3 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+quota/reduce: 4 pods (0 preempted), 14 s from first create to last finish, max 3 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+quota/commit: 1 pods (0 preempted), 10 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker2
+
+PS> Show-Log hw5-quota job/quota-commit | Select-Object -Last 15
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+PS> kc -n hw5-quota describe resourcequota hw5-quota
+Name:             hw5-quota
+Namespace:        hw5-quota
+Resource          Used  Hard
+--------          ----  ----
+count/jobs.batch  3     4
+limits.cpu        0     3
+limits.memory     0     1Gi
+pods              0     10
+requests.cpu      0     3
+requests.memory   0     1Gi
+
+PS> Storage-Memory
+rustfs-0: restarts 0, memory.current 3870 MiB, anon 1886 MiB, memory.peak 4004 MiB, memory.max 4096 MiB, memory.events low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,
+

@@ -1,0 +1,12 @@
+﻿[mem] pod low-map-2: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 16596992, "anon": 15396864, "file": 24576, "kernel": 532480}
+[map m0002 low-map-2] split 3/7: bytes 268,435,456-402,653,184 of s3://hh-lake/raw/it_vacancies_2024.csv
+[mem]    5.0 s  current     74 MiB  anon     68  file     3  kernel    3
+[mem-json] {"t": 5.02, "current": 77991936, "anon": 71077888, "file": 3047424, "kernel": 3604480}
+[mem] got signal SIGTERM at 8.8 s, forwarding to child
+[mem] exit code 143, wall 9.0 s
+[mem] peak: memory.peak 82 MiB; sampled every 0.1 s: current 81 MiB, anon 72 MiB, file 3 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.4 s over 9.0 s wall (0.38 CPU avg); throttled 0.0 s in 0 of 86 periods
+[mem-summary] {"pod": "low-map-2", "exit": 143, "wall": 8.962883190019056, "memory_max": 134217728, "memory_peak": 85753856, "sampled": {"current": 84766720, "anon": 75059200, "file": 3047424}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.366703, "cpu_throttled": 0.0}

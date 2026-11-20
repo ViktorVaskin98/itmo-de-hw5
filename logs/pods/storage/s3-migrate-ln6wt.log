@@ -1,0 +1,19 @@
+﻿source http://rustfs-lab:9000  ->  target http://rustfs:9000
+created bucket hh-lake
+OK  raw/it_vacancies_2024.csv -> raw/it_vacancies_2024.csv: 847,619,384 B  md5 45041a115287.. / 45041a115287..  45.47 s   17.8 MiB/s
+OK  results/mapreduce/_SUCCESS -> results/hw3/mapreduce/_SUCCESS:           0 B  md5 d41d8cd98f00.. / d41d8cd98f00..   0.25 s 
+OK  results/mapreduce/_job.json -> results/hw3/mapreduce/_job.json:       6,169 B  md5 35693e73c299.. / 35693e73c299..   0.08 s 
+OK  results/mapreduce/pairs/part-r-00000.csv -> results/hw3/mapreduce/pairs/part-r-00000.csv:     130,711 B  md5 dcbd52eb7e3b.. / dcbd52eb7e3b..   0.10 s 
+OK  results/mapreduce/pairs/part-r-00001.csv -> results/hw3/mapreduce/pairs/part-r-00001.csv:     125,030 B  md5 83661ddf8d69.. / 83661ddf8d69..   0.12 s 
+OK  results/mapreduce/pairs/part-r-00002.csv -> results/hw3/mapreduce/pairs/part-r-00002.csv:     128,775 B  md5 b55cf23cf05a.. / b55cf23cf05a..   0.07 s 
+OK  results/mapreduce/pairs/part-r-00003.csv -> results/hw3/mapreduce/pairs/part-r-00003.csv:     127,541 B  md5 dd064dc9fa90.. / dd064dc9fa90..   0.07 s 
+OK  results/mapreduce/skills/part-r-00000.csv -> results/hw3/mapreduce/skills/part-r-00000.csv:       8,839 B  md5 7f8a95d4e63b.. / 7f8a95d4e63b..   0.07 s 
+OK  results/mapreduce/skills/part-r-00001.csv -> results/hw3/mapreduce/skills/part-r-00001.csv:       7,043 B  md5 f48ea676abf8.. / f48ea676abf8..   0.08 s 
+OK  results/mapreduce/skills/part-r-00002.csv -> results/hw3/mapreduce/skills/part-r-00002.csv:       7,212 B  md5 8dd00378a223.. / 8dd00378a223..   0.09 s 
+OK  results/mapreduce/skills/part-r-00003.csv -> results/hw3/mapreduce/skills/part-r-00003.csv:       7,911 B  md5 ff9c8d55c8ad.. / ff9c8d55c8ad..   0.08 s 
+OK  results/mapreduce/triples/part-r-00000.csv -> results/hw3/mapreduce/triples/part-r-00000.csv:     883,530 B  md5 9e704258e096.. / 9e704258e096..   0.42 s 
+OK  results/mapreduce/triples/part-r-00001.csv -> results/hw3/mapreduce/triples/part-r-00001.csv:     890,552 B  md5 4b4405381813.. / 4b4405381813..   0.45 s 
+OK  results/mapreduce/triples/part-r-00002.csv -> results/hw3/mapreduce/triples/part-r-00002.csv:     887,627 B  md5 5650e4ba886b.. / 5650e4ba886b..   0.54 s 
+OK  results/mapreduce/triples/part-r-00003.csv -> results/hw3/mapreduce/triples/part-r-00003.csv:     892,635 B  md5 b4bcc5f78f24.. / b4bcc5f78f24..   0.31 s 
+target s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes, ETag "be9c1b4b3f57ff0e9771004c2a5fe78b-51"
+copied 15 objects, checksums match

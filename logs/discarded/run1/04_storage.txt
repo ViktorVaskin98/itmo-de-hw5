@@ -1,0 +1,177 @@
+﻿
+# Этап 2. RustFS из ДЗ 2 внутри кластера: тот же образ 1.0.1, восемь томов (EC 4+4), StatefulSet на узле hw5/pool=storage
+
+PS> Get-Content k8s\20-rustfs.yaml | Select-Object -First 70
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: hw5
+  labels:
+    app.kubernetes.io/name: rustfs
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: rustfs
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: s3
+      nodePort: 30900
+    - name: console
+      port: 9001
+      targetPort: console
+      nodePort: 30901
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rustfs
+  namespace: hw5
+  labels:
+    app.kubernetes.io/name: rustfs
+spec:
+  serviceName: rustfs
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rustfs
+    spec:
+      priorityClassName: storage-critical
+      nodeSelector:
+        hw5/pool: storage
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: rustfs
+          image: rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RUSTFS_VOLUMES
+              value: /data/disk{1...8}
+            - name: RUSTFS_UNSAFE_BYPASS_DISK_CHECK
+              value: "true"
+            - name: RUSTFS_ADDRESS
+              value: ":9000"
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "true"
+            - name: RUSTFS_CONSOLE_ADDRESS
+              value: ":9001"
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+
+PS> kc apply -f k8s\00-namespace.yaml -f k8s\05-priority.yaml -f k8s\20-rustfs.yaml
+namespace/hw5 unchanged
+secret/s3-credentials configured
+priorityclass.scheduling.k8s.io/storage-critical unchanged
+priorityclass.scheduling.k8s.io/batch-low unchanged
+priorityclass.scheduling.k8s.io/batch-high unchanged
+service/rustfs created
+statefulset.apps/rustfs created
+
+PS> kc -n hw5 rollout status statefulset/rustfs --timeout=300s
+Waiting for 1 pods to be ready...
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+
+PS> kc -n hw5 get statefulset,pod,svc -o wide
+Error from server (NotFound): statefulsets.apps "pod" not found
+Error from server (NotFound): statefulsets.apps "svc" not found
+[exit code 1]
+
+PS> kc -n hw5 get pvc -o "custom-columns=PVC:.metadata.name,STATUS:.status.phase,SIZE:.status.capacity.storage,CLASS:.spec.storageClassName,VOLUME:.spec.volumeName"
+PVC              STATUS   SIZE   CLASS      VOLUME
+disk1-rustfs-0   Bound    2Gi    standard   pvc-7d218611-ed9a-44e5-b916-7ad7f192c33c
+disk2-rustfs-0   Bound    2Gi    standard   pvc-18ad3f08-979c-4439-88db-ed1a96289dc7
+disk3-rustfs-0   Bound    2Gi    standard   pvc-c9b3c6f7-ce9f-455c-befb-6fb84db412b4
+disk4-rustfs-0   Bound    2Gi    standard   pvc-e602f889-0e4c-4516-81c3-367ce108961d
+disk5-rustfs-0   Bound    2Gi    standard   pvc-f377c445-1082-41b2-ae96-0d3a2e000452
+disk6-rustfs-0   Bound    2Gi    standard   pvc-af03f61c-0d95-4b2e-bfcf-4432b7f6edf1
+disk7-rustfs-0   Bound    2Gi    standard   pvc-e610e1fd-8110-4554-afb1-f02126705cdd
+disk8-rustfs-0   Bound    2Gi    standard   pvc-8526207e-4104-4220-b37e-ba0ebb889013
+
+PS> kc get pv -o "custom-columns=PV:.metadata.name,CLAIM:.spec.claimRef.name,NODE:.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].values[0],PATH:.spec.hostPath.path"
+PV                                         CLAIM            NODE                PATH
+pvc-18ad3f08-979c-4439-88db-ed1a96289dc7   disk2-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-18ad3f08-979c-4439-88db-ed1a96289dc7_hw5_disk2-rustfs-0
+pvc-7d218611-ed9a-44e5-b916-7ad7f192c33c   disk1-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-7d218611-ed9a-44e5-b916-7ad7f192c33c_hw5_disk1-rustfs-0
+pvc-8526207e-4104-4220-b37e-ba0ebb889013   disk8-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-8526207e-4104-4220-b37e-ba0ebb889013_hw5_disk8-rustfs-0
+pvc-af03f61c-0d95-4b2e-bfcf-4432b7f6edf1   disk6-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-af03f61c-0d95-4b2e-bfcf-4432b7f6edf1_hw5_disk6-rustfs-0
+pvc-c9b3c6f7-ce9f-455c-befb-6fb84db412b4   disk3-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-c9b3c6f7-ce9f-455c-befb-6fb84db412b4_hw5_disk3-rustfs-0
+pvc-e602f889-0e4c-4516-81c3-367ce108961d   disk4-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-e602f889-0e4c-4516-81c3-367ce108961d_hw5_disk4-rustfs-0
+pvc-e610e1fd-8110-4554-afb1-f02126705cdd   disk7-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-e610e1fd-8110-4554-afb1-f02126705cdd_hw5_disk7-rustfs-0
+pvc-f377c445-1082-41b2-ae96-0d3a2e000452   disk5-rustfs-0   hw5-control-plane   /var/local-path-provisioner/pvc-f377c445-1082-41b2-ae96-0d3a2e000452_hw5_disk5-rustfs-0
+
+PS> kc -n hw5 logs rustfs-0
+Initializing data directories: /data/disk1 /data/disk2 /data/disk3 /data/disk4 /data/disk5 /data/disk6 /data/disk7 /data/disk8
+Initializing log directory: /logs
+Starting: /usr/bin/rustfs  /data/disk1 /data/disk2 /data/disk3 /data/disk4 /data/disk5 /data/disk6 /data/disk7 /data/disk8
+
+# Перенос данных: задание s3-migrate читает бакет hh-lake в rustfs-lab и пишет в RustFS кластера, md5 считается по потоку источника и по повторному чтению копии
+
+PS> kc apply -f k8s\21-migrate-job.yaml
+job.batch/s3-migrate created
+
+PS> "job/s3-migrate -> $(Wait-JobDone hw5 s3-migrate 900)"
+job/s3-migrate -> Complete
+
+PS> Show-Log hw5 job/s3-migrate
+source http://rustfs-lab:9000  ->  target http://rustfs:9000
+created bucket hh-lake
+OK  raw/it_vacancies_2024.csv -> raw/it_vacancies_2024.csv: 847,619,384 B  md5 45041a115287.. / 45041a115287..  47.08 s   17.2 MiB/s
+OK  results/mapreduce/_SUCCESS -> results/hw3/mapreduce/_SUCCESS:           0 B  md5 d41d8cd98f00.. / d41d8cd98f00..   0.12 s 
+OK  results/mapreduce/_job.json -> results/hw3/mapreduce/_job.json:       6,169 B  md5 35693e73c299.. / 35693e73c299..   0.15 s 
+OK  results/mapreduce/pairs/part-r-00000.csv -> results/hw3/mapreduce/pairs/part-r-00000.csv:     130,711 B  md5 dcbd52eb7e3b.. / dcbd52eb7e3b..   0.11 s 
+OK  results/mapreduce/pairs/part-r-00001.csv -> results/hw3/mapreduce/pairs/part-r-00001.csv:     125,030 B  md5 83661ddf8d69.. / 83661ddf8d69..   0.09 s 
+OK  results/mapreduce/pairs/part-r-00002.csv -> results/hw3/mapreduce/pairs/part-r-00002.csv:     128,775 B  md5 b55cf23cf05a.. / b55cf23cf05a..   0.42 s 
+OK  results/mapreduce/pairs/part-r-00003.csv -> results/hw3/mapreduce/pairs/part-r-00003.csv:     127,541 B  md5 dd064dc9fa90.. / dd064dc9fa90..   0.32 s 
+OK  results/mapreduce/skills/part-r-00000.csv -> results/hw3/mapreduce/skills/part-r-00000.csv:       8,839 B  md5 7f8a95d4e63b.. / 7f8a95d4e63b..   0.24 s 
+OK  results/mapreduce/skills/part-r-00001.csv -> results/hw3/mapreduce/skills/part-r-00001.csv:       7,043 B  md5 f48ea676abf8.. / f48ea676abf8..   0.16 s 
+OK  results/mapreduce/skills/part-r-00002.csv -> results/hw3/mapreduce/skills/part-r-00002.csv:       7,212 B  md5 8dd00378a223.. / 8dd00378a223..   0.08 s 
+OK  results/mapreduce/skills/part-r-00003.csv -> results/hw3/mapreduce/skills/part-r-00003.csv:       7,911 B  md5 ff9c8d55c8ad.. / ff9c8d55c8ad..   0.08 s 
+OK  results/mapreduce/triples/part-r-00000.csv -> results/hw3/mapreduce/triples/part-r-00000.csv:     883,530 B  md5 9e704258e096.. / 9e704258e096..   0.62 s 
+OK  results/mapreduce/triples/part-r-00001.csv -> results/hw3/mapreduce/triples/part-r-00001.csv:     890,552 B  md5 4b4405381813.. / 4b4405381813..   0.63 s 
+OK  results/mapreduce/triples/part-r-00002.csv -> results/hw3/mapreduce/triples/part-r-00002.csv:     887,627 B  md5 5650e4ba886b.. / 5650e4ba886b..   0.54 s 
+OK  results/mapreduce/triples/part-r-00003.csv -> results/hw3/mapreduce/triples/part-r-00003.csv:     892,635 B  md5 b4bcc5f78f24.. / b4bcc5f78f24..   0.55 s 
+target s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes, ETag "be9c1b4b3f57ff0e9771004c2a5fe78b-51"
+copied 15 objects, checksums match
+
+PS> (Get-FileHash C:\itmo\vk\task2\it_vacancies_2024.csv -Algorithm MD5).Hash.ToLower()
+45041a115287e29b41fc8f82818ec5a6
+
+# Раскладка по дискам: на каждом из восьми томов около 1/4 объекта - 4 блока данных и 4 чётности
+
+PS> kc -n hw5 exec rustfs-0 '--' sh -c "du -sh /data/disk*; ls /data/disk1/hh-lake/raw/it_vacancies_2024.csv/*/ | head -4"
+204M	/data/disk1
+204M	/data/disk2
+204M	/data/disk3
+204M	/data/disk4
+204M	/data/disk5
+204M	/data/disk6
+204M	/data/disk7
+204M	/data/disk8
+part.1
+part.1.meta
+part.10
+part.10.meta
+
+# С хоста RustFS кластера доступен через NodePort 30900 -> 127.0.0.1:9100 (extraPortMappings kind)
+
+PS> uvpy -m hhlake.kube.plan --chunk-mb 32
+s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes, 26 splits x 32 MiB
+  m0000: bytes 0-33,554,432 (33,554,432)
+  m0001: bytes 33,554,432-67,108,864 (33,554,432)
+  m0025: bytes 838,860,800-847,619,384 (8,758,584)
+

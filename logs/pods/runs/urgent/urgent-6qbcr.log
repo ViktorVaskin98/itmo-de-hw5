@@ -1,0 +1,124 @@
+﻿[mem] pod urgent-6qbcr: memory.max 704 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[mem]    0.0 s  current     19 MiB  anon     15  file     3  kernel    0
+[mem-json] {"t": 0.0, "current": 19865600, "anon": 15241216, "file": 3149824, "kernel": 507904}
+[mem]    0.5 s  current     33 MiB  anon     29  file     3  kernel    1
+[mem-json] {"t": 0.51, "current": 34762752, "anon": 30367744, "file": 3174400, "kernel": 712704}
+[mem]    1.0 s  current     50 MiB  anon     43  file     5  kernel    1
+[mem-json] {"t": 1.01, "current": 51965952, "anon": 44806144, "file": 5636096, "kernel": 1179648}
+[mem]    1.5 s  current     57 MiB  anon     50  file     5  kernel    1
+[mem-json] {"t": 1.52, "current": 60063744, "anon": 52477952, "file": 5718016, "kernel": 1556480}
+[mem]    2.0 s  current     72 MiB  anon     63  file     5  kernel    4
+[mem-json] {"t": 2.02, "current": 75587584, "anon": 65757184, "file": 5738496, "kernel": 3719168}
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-185009-786c38
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/urgent/ (0.11 s)
+[mem]    2.5 s  current    113 MiB  anon    101  file     5  kernel    5
+[mem-json] {"t": 2.54, "current": 118276096, "anon": 105447424, "file": 5738496, "kernel": 5447680}
+[mem]    3.1 s  current    165 MiB  anon    153  file     5  kernel    5
+[mem-json] {"t": 3.06, "current": 172912640, "anon": 160231424, "file": 5738496, "kernel": 5672960}
+[mem]    3.6 s  current    197 MiB  anon    184  file     5  kernel    6
+[mem-json] {"t": 3.57, "current": 206639104, "anon": 193175552, "file": 5738496, "kernel": 5992448}
+[mem]    4.1 s  current    221 MiB  anon    208  file     5  kernel    6
+[mem-json] {"t": 4.08, "current": 232099840, "anon": 218030080, "file": 5738496, "kernel": 6791168}
+[mem]    4.6 s  current    293 MiB  anon    278  file     5  kernel    8
+[mem-json] {"t": 4.64, "current": 306831360, "anon": 291115008, "file": 5738496, "kernel": 8298496}
+[mem]    5.2 s  current    320 MiB  anon    305  file     5  kernel    9
+[mem-json] {"t": 5.15, "current": 335151104, "anon": 319426560, "file": 5738496, "kernel": 8933376}
+[mem]    5.7 s  current    352 MiB  anon    337  file     5  kernel    9
+[mem-json] {"t": 5.66, "current": 369340416, "anon": 352886784, "file": 5738496, "kernel": 9154560}
+[mem]    6.2 s  current    381 MiB  anon    365  file     5  kernel    9
+[mem-json] {"t": 6.18, "current": 399679488, "anon": 382902272, "file": 5738496, "kernel": 9326592}
+[mem]    6.7 s  current    442 MiB  anon    427  file     5  kernel    9
+[mem-json] {"t": 6.69, "current": 463921152, "anon": 447680512, "file": 5738496, "kernel": 9637888}
+[mem]    7.3 s  current    500 MiB  anon    484  file     6  kernel    9
+[mem-json] {"t": 7.27, "current": 523980800, "anon": 507539456, "file": 5955584, "kernel": 9646080}
+[mem]    7.8 s  current    507 MiB  anon    492  file     6  kernel    9
+[mem-json] {"t": 7.78, "current": 532013056, "anon": 516177920, "file": 5918720, "kernel": 9662464}
+[mem]    8.3 s  current    510 MiB  anon    495  file     6  kernel    9
+[mem-json] {"t": 8.32, "current": 535199744, "anon": 519319552, "file": 5840896, "kernel": 9543680}
+[mem]    8.9 s  current    517 MiB  anon    502  file     6  kernel    9
+[mem-json] {"t": 8.86, "current": 541757440, "anon": 526106624, "file": 5791744, "kernel": 9555968}
+[mem]    9.4 s  current    536 MiB  anon    515  file     5  kernel    9
+[mem-json] {"t": 9.38, "current": 562163712, "anon": 539500544, "file": 5713920, "kernel": 9580544}
+[mem]    9.9 s  current    537 MiB  anon    516  file     6  kernel    9
+[mem-json] {"t": 9.91, "current": 562860032, "anon": 540672000, "file": 6078464, "kernel": 9641984}
+[mem]   10.4 s  current    535 MiB  anon    516  file     6  kernel    9
+[mem-json] {"t": 10.44, "current": 560766976, "anon": 541073408, "file": 6438912, "kernel": 9711616}
+[mem]   11.0 s  current    532 MiB  anon    516  file     7  kernel    9
+[mem-json] {"t": 10.97, "current": 558288896, "anon": 541290496, "file": 6918144, "kernel": 9826304}
+[mem]   11.5 s  current    532 MiB  anon    516  file     7  kernel    9
+[mem-json] {"t": 11.5, "current": 558268416, "anon": 540999680, "file": 6840320, "kernel": 9805824}
+[mem]   12.0 s  current    535 MiB  anon    516  file     6  kernel    9
+[mem-json] {"t": 12.02, "current": 561164288, "anon": 541429760, "file": 6782976, "kernel": 9805824}
+[mem]   12.5 s  current    535 MiB  anon    516  file     6  kernel    9
+[mem-json] {"t": 12.54, "current": 561143808, "anon": 541523968, "file": 6639616, "kernel": 9838592}
+[mem]   13.1 s  current    537 MiB  anon    517  file     6  kernel    9
+[mem-json] {"t": 13.07, "current": 563044352, "anon": 542105600, "file": 6610944, "kernel": 9924608}
+[mem]   13.6 s  current    534 MiB  anon    517  file     6  kernel   10
+[mem-json] {"t": 13.59, "current": 560287744, "anon": 542433280, "file": 6713344, "kernel": 10002432}
+[mem]   14.2 s  current    535 MiB  anon    517  file     6  kernel   10
+[mem-json] {"t": 14.16, "current": 561496064, "anon": 542466048, "file": 6086656, "kernel": 9990144}
+[mem]   14.7 s  current    540 MiB  anon    518  file     6  kernel   10
+[mem-json] {"t": 14.72, "current": 566538240, "anon": 542859264, "file": 5955584, "kernel": 10035200}
+[mem]   15.2 s  current    536 MiB  anon    518  file     7  kernel   10
+[mem-json] {"t": 15.23, "current": 562147328, "anon": 543068160, "file": 7487488, "kernel": 10219520}
+[master] map phase: 13.25 s, 26 attempts, 0 failed
+[mem]   15.7 s  current    536 MiB  anon    518  file     8  kernel   10
+[mem-json] {"t": 15.73, "current": 562024448, "anon": 543555584, "file": 7950336, "kernel": 10264576}
+[mem]   16.8 s  current    549 MiB  anon    530  file     9  kernel   10
+[mem-json] {"t": 16.82, "current": 575205376, "anon": 555274240, "file": 9121792, "kernel": 10289152}
+[master] reduce phase: 1.69 s, 4 attempts, 0 failed
+[mem]   17.3 s  current    532 MiB  anon    514  file     9  kernel   10
+[mem-json] {"t": 17.32, "current": 558157824, "anon": 538488832, "file": 9150464, "kernel": 10264576}
+[mem]   17.9 s  current    525 MiB  anon    507  file     9  kernel   10
+[mem-json] {"t": 17.86, "current": 550989824, "anon": 531329024, "file": 9150464, "kernel": 10256384}
+[master] worker processes spawned: 8 (reused across tasks)
+[master] fetched 849,257,809 bytes (1.0019 x input), lines 229,388, csv-parsed 87,803
+[master] variant vacancies: 3,816, with key_skills: 2,951
+[master] map CPU time, all tasks: 16.8 s
+stack        emitted  after combine  distinct   sum count
+skills        16,801          5,626     1,504      16,801
+pairs         60,044         40,738    16,730      60,044
+triples      200,072        169,890    82,458     200,072
+-- top skills
+   1950  c++
+   1537  linux
+    918  c/c++
+    849  git
+    640  qt
+    480  stl
+    386  python
+    360  ооп
+    327  sql
+    299  boost
+-- top pairs
+    908  c++ + linux
+    611  c/c++ + linux
+    558  git + linux
+    542  c++ + git
+    535  c++ + qt
+    411  c++ + stl
+    326  linux + qt
+    280  c++ + python
+    280  c++ + ооп
+    273  c++ + sql
+-- top triples
+    323  c++ + git + linux
+    252  c++ + linux + qt
+    214  c++ + git + qt
+    201  c/c++ + git + linux
+    187  c++ + linux + stl
+    174  boost + c++ + stl
+    170  c++ + c/c++ + linux
+    164  git + linux + qt
+    153  c++ + linux + python
+    136  c++ + git + ооп
+[master] output s3://hh-lake/results/k8s/urgent/{skills,pairs,triples}/part-r-*.csv, total 16.54 s
+[mem]   18.4 s  current     87 MiB  anon     78  file     4  kernel    5
+[mem-json] {"t": 18.37, "current": 91369472, "anon": 82022400, "file": 3907584, "kernel": 5185536}
+[mem] exit code 0, wall 18.6 s
+[mem] peak: memory.peak 551 MiB; sampled every 0.1 s: current 549 MiB, anon 530 MiB, file 9 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 42.7 s over 18.6 s wall (2.30 CPU avg); throttled 16.0 s in 64 of 184 periods
+[mem-summary] {"pod": "urgent-6qbcr", "exit": 0, "wall": 18.60307611199096, "memory_max": 738197504, "memory_peak": 577560576, "sampled": {"current": 575205376, "anon": 555274240, "file": 9150464}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 42.697571, "cpu_throttled": 16.000058}

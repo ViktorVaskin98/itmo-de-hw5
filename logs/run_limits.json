@@ -1,0 +1,5 @@
+{
+    "MEMORY":  "128Mi",
+    "SPLITS":  26,
+    "REDUCE_MEMORY":  "128Mi"
+}

@@ -1,0 +1,15 @@
+﻿[mem] pod quota-reduce-0: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 17113088, "anon": 15405056, "file": 24576, "kernel": 561152}
+[reduce r000 quota-reduce-0] fetched 78 partition files from 26 splits, 1,097,756 bytes
+[mem]    5.0 s  current     69 MiB  anon     64  file     1  kernel    4
+[mem-json] {"t": 5.0, "current": 72859648, "anon": 67178496, "file": 1445888, "kernel": 3981312}
+[reduce r000 quota-reduce-0] stack 1: 404 keys, 5,605 occurrences
+[reduce r000 quota-reduce-0] stack 2: 4,145 keys, 13,090 occurrences
+[reduce r000 quota-reduce-0] stack 3: 20,431 keys, 50,209 occurrences
+[reduce r000 quota-reduce-0] wrote s3://hh-lake/results/k8s/quota/*/part-r-00000.csv in 3.35 s
+[mem] exit code 0, wall 5.5 s
+[mem] peak: memory.peak 70 MiB; sampled every 0.1 s: current 69 MiB, anon 64 MiB, file 1 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.8 s over 5.5 s wall (0.69 CPU avg); throttled 0.5 s in 11 of 52 periods
+[mem-summary] {"pod": "quota-reduce-0", "exit": 0, "wall": 5.514076588966418, "memory_max": 134217728, "memory_peak": 73060352, "sampled": {"current": 72859648, "anon": 67178496, "file": 1458176}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.777799, "cpu_throttled": 0.542108}

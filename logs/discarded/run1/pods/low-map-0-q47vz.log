@@ -1,0 +1,147 @@
+﻿[mem] pod low-map-0: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     14 MiB  anon     10  file     3  kernel    1
+[mem-json] {"t": 0.0, "current": 14757888, "anon": 10817536, "file": 2977792, "kernel": 557056}
+[mem]    5.0 s  current     47 MiB  anon     36  file    10  kernel    1
+[mem-json] {"t": 5.03, "current": 49790976, "anon": 37437440, "file": 10870784, "kernel": 1224704}
+[mem]   10.1 s  current     74 MiB  anon     59  file    12  kernel    3
+[mem-json] {"t": 10.06, "current": 78036992, "anon": 61816832, "file": 12906496, "kernel": 3067904}
+[map m0000 low-map-0] split 1/26: bytes 0-33,554,432 of s3://hh-lake/raw/it_vacancies_2024.csv
+[mem]   15.1 s  current     79 MiB  anon     63  file    12  kernel    3
+[mem-json] {"t": 15.14, "current": 82354176, "anon": 65695744, "file": 12804096, "kernel": 3592192}
+[mem]   20.1 s  current     79 MiB  anon     63  file    12  kernel    3
+[mem-json] {"t": 20.14, "current": 82350080, "anon": 65695744, "file": 12800000, "kernel": 3600384}
+[mem]   25.1 s  current     79 MiB  anon     63  file    12  kernel    3
+[mem-json] {"t": 25.14, "current": 83001344, "anon": 66322432, "file": 12820480, "kernel": 3604480}
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connection.py", line 239, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.13/site-packages/botocore/httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        **extra_kwargs,
+    )
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/util/retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 499, in _make_request
+    conn.request(
+    ~~~~~~~~~~~~^
+        method,
+        ^^^^^^^
+    ...<6 lines>...
+        enforce_content_length=enforce_content_length,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connection.py", line 567, in request
+    self.endheaders()
+    ~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/http/client.py", line 1381, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/awsrequest.py", line 123, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/awsrequest.py", line 223, in send
+    return super().send(str)
+           ~~~~~~~~~~~~^^^^^
+  File "/usr/local/lib/python3.13/http/client.py", line 1085, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connection.py", line 398, in connect
+    self.sock = self._new_conn()
+                ~~~~~~~~~~~~~~^^
+  File "/opt/venv/lib/python3.13/site-packages/urllib3/connection.py", line 254, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: AWSHTTPConnection(host='rustfs.hw5.svc.cluster.local', port=9000): Failed to establish a new connection: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/app/src/hhlake/kube/maptask.py", line 48, in <module>
+    main()
+    ~~~~^^
+  File "/app/src/hhlake/kube/maptask.py", line 38, in main
+    run_map(MapTask(job, split, 1))
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/hhlake/mapreduce/mapper.py", line 87, in run_map
+    for row in records(task, stats):
+               ~~~~~~~^^^^^^^^^^^^^
+  File "/app/src/hhlake/mapreduce/mapper.py", line 66, in _csv_records
+    for line in iter_split_lines(iter(meter), split):
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/hhlake/mapreduce/splits.py", line 41, in iter_split_lines
+    for chunk in chunks:
+                 ^^^^^^
+  File "/app/src/hhlake/mapreduce/mapper.py", line 36, in __iter__
+    for chunk in self.chunks:
+                 ^^^^^^^^^^^
+  File "/app/src/hhlake/mapreduce/splits.py", line 29, in _ranged_chunks
+    body = client.get_object(Bucket=bucket, Key=key, Range=f"bytes={frm}-{to - 1}")["Body"]
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "/opt/venv/lib/python3.13/site-packages/botocore/client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ~~~~~~~~~~~~~~~~~~^
+        operation_model, request_dict, request_context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/endpoint.py", line 231, in _send_request
+    raise exception
+  File "/opt/venv/lib/python3.13/site-packages/botocore/endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+  File "/opt/venv/lib/python3.13/site-packages/botocore/endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/opt/venv/lib/python3.13/site-packages/botocore/httpsession.py", line 540, in send
+    raise EndpointConnectionError(endpoint_url=request.url, error=e)
+botocore.exceptions.EndpointConnectionError: Could not connect to the endpoint URL: "http://rustfs.hw5.svc.cluster.local:9000/hh-lake/raw/it_vacancies_2024.csv"
+[mem] exit code 1, wall 26.4 s
+[mem] peak: memory.peak 80 MiB; sampled every 0.1 s: current 80 MiB, anon 64 MiB, file 12 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 9.2 s over 26.4 s wall (0.35 CPU avg); throttled 0.1 s in 3 of 253 periods
+[mem-summary] {"pod": "low-map-0", "exit": 1, "wall": 26.375208812998608, "memory_max": 134217728, "memory_peak": 83562496, "sampled": {"current": 83562496, "anon": 66621440, "file": 13082624}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 9.229675, "cpu_throttled": 0.098831}

@@ -1,0 +1,42 @@
+# Первый полный прогон: RustFS с пределом 1536Mi (на глаз) получил OOMKilled посреди map; события пода rustfs-0 до перезапуска с новым пределом
+
+PS> kc -n hw5 get events --field-selector involvedObject.name=rustfs-0 --sort-by=.lastTimestamp
+LAST                   TYPE      REASON      COUNT   MESSAGE
+2026-11-20T15:42:48Z   Normal    Pulling     1       Pulling image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c"
+2026-11-20T15:42:48Z   Normal    Scheduled   1       Successfully assigned hw5/rustfs-0 to hw5-control-plane
+2026-11-20T15:43:09Z   Normal    Pulled      1       Successfully pulled image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" in 23.48s (23.48s including
+2026-11-20T15:51:09Z   Warning   Unhealthy   1       Readiness probe failed: Get "http://10.244.0.13:9000/health": dial tcp 10.244.0.13:9000: connect: connection refused
+2026-11-20T15:54:57Z   Warning   BackOff     7       Back-off restarting failed container rustfs in pod rustfs-0_hw5(a88df908-6c46-4993-a9e5-1d38b4f5a2a3)
+2026-11-20T15:55:07Z   Normal    Created     4       Created container: rustfs
+2026-11-20T15:55:07Z   Normal    Pulled      3       Container image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" already present on machine
+2026-11-20T15:55:07Z   Normal    Started     4       Started container rustfs
+2026-11-20T16:04:37Z   Normal    Killing     1       Stopping container rustfs
+2026-11-20T16:04:38Z   Normal    Scheduled   1       Successfully assigned hw5/rustfs-0 to hw5-control-plane
+2026-11-20T16:04:39Z   Normal    Pulled      1       Container image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" already present on machine
+2026-11-20T16:04:39Z   Normal    Created     1       Created container: rustfs
+2026-11-20T16:04:39Z   Normal    Started     1       Started container rustfs
+2026-11-20T16:06:25Z   Normal    Created     1       Created container: rustfs
+2026-11-20T16:06:25Z   Normal    Pulled      1       Container image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" already present on machine
+2026-11-20T16:06:25Z   Normal    Started     1       Started container rustfs
+2026-11-20T16:06:26Z   Normal    Killing     1       Stopping container rustfs
+2026-11-20T16:06:26Z   Warning   Unhealthy   1       Readiness probe failed: Get "http://10.244.0.14:9000/health": dial tcp 10.244.0.14:9000: connect: connection refused
+2026-11-20T16:06:29Z   Normal    Scheduled   1       Successfully assigned hw5/rustfs-0 to hw5-control-plane
+2026-11-20T16:08:05Z   Normal    Killing     1       Stopping container rustfs
+2026-11-20T16:08:07Z   Normal    Scheduled   1       Successfully assigned hw5/rustfs-0 to hw5-control-plane
+2026-11-20T16:08:08Z   Normal    Pulled      1       Container image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" already present on machine
+2026-11-20T16:08:08Z   Normal    Created     1       Created container: rustfs
+2026-11-20T16:08:08Z   Normal    Started     1       Started container rustfs
+2026-11-20T16:13:39Z   Normal    Killing     1       Stopping container rustfs
+2026-11-20T16:13:41Z   Normal    Scheduled   1       Successfully assigned hw5/rustfs-0 to hw5-control-plane
+2026-11-20T16:13:42Z   Normal    Pulled      1       Container image "rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c" already present on machine
+2026-11-20T16:13:42Z   Normal    Created     1       Created container: rustfs
+2026-11-20T16:13:42Z   Normal    Started     1       Started container rustfs
+
+# Состояние rustfs-0 во время прогона (после 05_parallel и после 07_preemption)
+PS> kc -n hw5 get pod rustfs-0 -o custom-columns=RESTARTS:.status.containerStatuses[0].restartCount,LAST:.status.containerStatuses[0].lastState.terminated.reason,AT:.status.containerStatuses[0].lastState.terminated.finishedAt
+RESTARTS   LAST        AT
+1          OOMKilled   2026-11-20T15:46:20Z
+
+PS> kc -n hw5 get pod rustfs-0 -o custom-columns=RESTARTS:.status.containerStatuses[0].restartCount,LAST:.status.containerStatuses[0].lastState.terminated.reason,AT:.status.containerStatuses[0].lastState.terminated.finishedAt
+RESTARTS   LAST        AT
+2          OOMKilled   2026-11-20T15:50:53Z

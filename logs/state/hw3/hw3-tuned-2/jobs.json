@@ -1,0 +1,168 @@
+﻿{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"hw3-tuned-2\",\"hw5/stage\":\"hw3-job\"},\"name\":\"hw3-tuned-2\",\"namespace\":\"hw5\"},\"spec\":{\"backoffLimit\":2,\"podFailurePolicy\":{\"rules\":[{\"action\":\"FailJob\",\"onExitCodes\":{\"containerName\":\"mapreduce\",\"operator\":\"In\",\"values\":[137]}}]},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"hw3-tuned-2\",\"hw5/stage\":\"hw3-job\"}},\"spec\":{\"containers\":[{\"command\":[\"python\",\"-m\",\"hhlake.kube.memwatch\",\"--report-every\",\"0.5\",\"--\",\"python\",\"-m\",\"hhlake.mapreduce\",\"--workers\",\"8\",\"--workdir\",\"/work\",\"--output\",\"results/k8s/hw3-tuned-2\"],\"env\":[{\"name\":\"S3_ENDPOINT\",\"value\":\"http://rustfs-lab:9000\"}],\"envFrom\":[{\"secretRef\":{\"name\":\"s3-credentials\"}}],\"image\":\"hw5-hhlake:0.3.0\",\"imagePullPolicy\":\"Never\",\"name\":\"mapreduce\",\"resources\":{\"limits\":{\"cpu\":\"4\",\"memory\":\"704Mi\"},\"requests\":{\"cpu\":\"2\",\"memory\":\"704Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/work\",\"name\":\"work\"}]}],\"nodeSelector\":{\"hw5/pool\":\"batch\"},\"priorityClassName\":\"batch-low\",\"restartPolicy\":\"Never\",\"volumes\":[{\"emptyDir\":{},\"name\":\"work\"}]}}}}\n"
+                },
+                "creationTimestamp": "2026-11-20T18:41:08Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/name": "hhlake",
+                    "hw5/run": "hw3-tuned-2",
+                    "hw5/stage": "hw3-job"
+                },
+                "name": "hw3-tuned-2",
+                "namespace": "hw5",
+                "resourceVersion": "1398",
+                "uid": "925d13ea-5b8e-47a6-b863-3c146062feb6"
+            },
+            "spec": {
+                "backoffLimit": 2,
+                "completionMode": "NonIndexed",
+                "completions": 1,
+                "manualSelector": false,
+                "parallelism": 1,
+                "podFailurePolicy": {
+                    "rules": [
+                        {
+                            "action": "FailJob",
+                            "onExitCodes": {
+                                "containerName": "mapreduce",
+                                "operator": "In",
+                                "values": [
+                                    137
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "podReplacementPolicy": "Failed",
+                "selector": {
+                    "matchLabels": {
+                        "batch.kubernetes.io/controller-uid": "925d13ea-5b8e-47a6-b863-3c146062feb6"
+                    }
+                },
+                "suspend": false,
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/name": "hhlake",
+                            "batch.kubernetes.io/controller-uid": "925d13ea-5b8e-47a6-b863-3c146062feb6",
+                            "batch.kubernetes.io/job-name": "hw3-tuned-2",
+                            "controller-uid": "925d13ea-5b8e-47a6-b863-3c146062feb6",
+                            "hw5/run": "hw3-tuned-2",
+                            "hw5/stage": "hw3-job",
+                            "job-name": "hw3-tuned-2"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "command": [
+                                    "python",
+                                    "-m",
+                                    "hhlake.kube.memwatch",
+                                    "--report-every",
+                                    "0.5",
+                                    "--",
+                                    "python",
+                                    "-m",
+                                    "hhlake.mapreduce",
+                                    "--workers",
+                                    "8",
+                                    "--workdir",
+                                    "/work",
+                                    "--output",
+                                    "results/k8s/hw3-tuned-2"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "S3_ENDPOINT",
+                                        "value": "http://rustfs-lab:9000"
+                                    }
+                                ],
+                                "envFrom": [
+                                    {
+                                        "secretRef": {
+                                            "name": "s3-credentials"
+                                        }
+                                    }
+                                ],
+                                "image": "hw5-hhlake:0.3.0",
+                                "imagePullPolicy": "Never",
+                                "name": "mapreduce",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "4",
+                                        "memory": "704Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "2",
+                                        "memory": "704Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/work",
+                                        "name": "work"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "hw5/pool": "batch"
+                        },
+                        "priorityClassName": "batch-low",
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30,
+                        "volumes": [
+                            {
+                                "emptyDir": {},
+                                "name": "work"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2026-11-20T18:41:48Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2026-11-20T18:41:48Z",
+                        "lastTransitionTime": "2026-11-20T18:41:48Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "SuccessCriteriaMet"
+                    },
+                    {
+                        "lastProbeTime": "2026-11-20T18:41:48Z",
+                        "lastTransitionTime": "2026-11-20T18:41:48Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "ready": 0,
+                "startTime": "2026-11-20T18:41:08Z",
+                "succeeded": 1,
+                "terminating": 0,
+                "uncountedTerminatedPods": {}
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

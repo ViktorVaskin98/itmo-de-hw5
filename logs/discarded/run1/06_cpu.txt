@@ -1,0 +1,123 @@
+﻿
+# Этап 4а. Нехватка процессора: тот же map, но каждый под просит 1500m CPU, а у воркера allocatable 4 CPU - на узел помещается два пода (3 CPU), оставшийся 1 CPU никому не подходит
+
+PS> Start-Map $cpu
+job.batch/cpu-map created
+
+PS> Wait-Running hw5 "hw5/run=cpu" 4
+4 pods Running at 18:48:34
+
+PS> Pods hw5 "hw5/run=cpu" | Select-Object -First 10
+POD               PRIORITY    PHASE     NODE          NOMINATED   CPU
+cpu-map-0-hm4ts   batch-low   Running   hw5-worker    <none>      1500m
+cpu-map-1-dvbdq   batch-low   Running   hw5-worker    <none>      1500m
+cpu-map-2-r58x7   batch-low   Running   hw5-worker2   <none>      1500m
+cpu-map-3-hbvmn   batch-low   Running   hw5-worker2   <none>      1500m
+cpu-map-4-gbdnj   batch-low   Pending   <none>        <none>      1500m
+cpu-map-5-82jh8   batch-low   Pending   <none>        <none>      1500m
+cpu-map-6-hb68d   batch-low   Pending   <none>        <none>      1500m
+cpu-map-7-6b5br   batch-low   Pending   <none>        <none>      1500m
+
+PS> kc -n hw5 get events --field-selector reason=FailedScheduling -o "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,COUNT:.count,MESSAGE:.message" | Select-Object -First 5
+LAST                   POD                  COUNT   MESSAGE
+2026-11-20T15:48:24Z   cpu-map-4-gbdnj      1       0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 Insufficient cpu. no new claims to deallocate, preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+2026-11-20T15:48:24Z   cpu-map-5-82jh8      1       0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 Insufficient cpu. no new claims to deallocate, preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+2026-11-20T15:48:24Z   cpu-map-6-hb68d      1       0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 Insufficient cpu. no new claims to deallocate, preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+2026-11-20T15:48:24Z   cpu-map-7-6b5br      1       0/3 nodes are available: 1 node(s) had untolerated taint(s), 2 Insufficient cpu. no new claims to deallocate, preemption: 0/3 nodes are available: 1 Preemption is not helpful for scheduling, 2 No preemption victims found for incoming pod.
+
+PS> kc describe node hw5-worker | Select-String -Pattern "Allocatable:" -Context 0,6
+
+> Allocatable:
+    cpu:                4
+    ephemeral-storage:  1055762868Ki
+    hugepages-1Gi:      0
+    hugepages-2Mi:      0
+    memory:             2471116Ki
+    pods:               110
+
+PS> kc describe node hw5-worker | Select-String -Pattern "Allocated resources:" -Context 0,6
+
+> Allocated resources:
+    (Total limits may be over 100 percent, i.e., overcommitted.)
+    Resource           Requests     Limits
+    --------           --------     ------
+    cpu                3100m (77%)  3 (75%)
+    memory             306Mi (12%)  256Mi (10%)
+    ephemeral-storage  0 (0%)       0 (0%)
+
+PS> Complete-Run $cpu
+map: Complete
+job.batch/cpu-reduce created
+reduce: Complete
+job.batch/cpu-commit created
+commit: Complete
+
+PS> Show-Job hw5 cpu-map
+JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END
+cpu-map   26            26          <none>   2026-11-20T15:48:24Z   2026-11-20T15:49:50Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+
+PS> uvpy tools\timeline.py logs\state\runs\cpu
+times in seconds from 15:48:24 UTC: created, scheduled, started, finished
+pod                     node          created  sched  start    end  pending  result
+cpu-map-0-hm4ts         hw5-worker          0      0      4     16       0s  Completed
+cpu-map-1-dvbdq         hw5-worker          0      0      4     16       0s  Completed
+cpu-map-2-r58x7         hw5-worker2         0      0      4     16       0s  Completed
+cpu-map-3-hbvmn         hw5-worker2         0      0      4     16       0s  Completed
+cpu-map-4-gbdnj         hw5-worker2         0     18     17     23      18s  Completed
+cpu-map-5-82jh8         hw5-worker2         0     18     17     24      18s  Completed
+cpu-map-6-hb68d         hw5-worker          0     18     17     24      18s  Completed
+cpu-map-7-6b5br         hw5-worker          0     18     17     24      18s  Completed
+cpu-map-10-mhpcp        hw5-worker         18     26     28     37       8s  Completed
+cpu-map-11-h24bd        hw5-worker         18     26     28     37       8s  Completed
+cpu-map-8-dzs9q         hw5-worker2        18     25     28     37       7s  Completed
+cpu-map-9-njjxr         hw5-worker2        18     26     28     37       8s  Completed
+cpu-map-12-8hws9        hw5-worker2        26     39     41     47      13s  Completed
+cpu-map-13-v7vhf        hw5-worker         26     39     41     48      13s  Completed
+cpu-map-14-dbr56        hw5-worker2        26     39     41     48      13s  Completed
+cpu-map-15-m6cc4        hw5-worker         26     39     41     48      13s  Completed
+cpu-map-16-g4lkb        hw5-worker2        39     50     51     58      11s  Completed
+cpu-map-17-xqrjf        hw5-worker         39     51     53     60      12s  Completed
+cpu-map-18-h226n        hw5-worker         39     51     52     60      12s  Completed
+cpu-map-19-q5cj9        hw5-worker2        39     72     75     83      33s  Completed
+cpu-map-20-f8glc        hw5-worker2        50     51     52     59       1s  Completed
+cpu-map-21-wlvh7        hw5-worker2        51     61     62     68      10s  Completed
+cpu-map-22-7r6ml        hw5-worker         51     62     64     70      11s  Completed
+cpu-map-23-bdxhl        hw5-worker         51     62     64     70      11s  Completed
+cpu-map-24-d9cnf        hw5-worker2        61     62     64     69       1s  Completed
+cpu-map-25-srnh9        hw5-worker2        62     70     71     75       8s  Completed
+cpu-reduce-0-4hcbb      hw5-worker         87     87     88     92       0s  Completed
+cpu-reduce-1-mftwp      hw5-worker2        87     87     88     92       0s  Completed
+cpu-reduce-2-zkttj      hw5-worker2        87     87     88     92       0s  Completed
+cpu-reduce-3-66t5b      hw5-worker         87     87     88     92       0s  Completed
+cpu-commit-2szxz        hw5-worker         95     95     97    102       0s  Completed
+cpu/map: 26 pods (0 preempted), 83 s from first create to last finish, max 4 running at once, pending max 33 s / mean 10.2 s, nodes hw5-worker, hw5-worker2
+cpu/reduce: 4 pods (0 preempted), 5 s from first create to last finish, max 4 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+cpu/commit: 1 pods (0 preempted), 7 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker
+
+PS> uvpy tools\timeline.py logs\state\runs\par --brief
+par/map: 29 pods (0 preempted), 43 s from first create to last finish, max 6 running at once, pending max 7 s / mean 1.8 s, nodes hw5-worker, hw5-worker2
+par/reduce: 4 pods (0 preempted), 5 s from first create to last finish, max 4 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+par/commit: 1 pods (0 preempted), 5 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker2
+
+PS> Show-Log hw5 job/cpu-commit | Select-Object -Last 15
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+PS> Select-String -Path logs\pods\hw3\hw3-tuned-1\*.log -Pattern "\[cpu\]" | ForEach-Object Line
+[cpu] usage 25.1 s over 19.6 s wall (1.29 CPU avg); throttled 4.8 s in 34 of 195 periods
+

@@ -1,0 +1,289 @@
+﻿{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:02Z",
+                "generateName": "hw3-256mi-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/name": "hhlake",
+                    "batch.kubernetes.io/controller-uid": "2a8bf788-32c2-47f7-a475-ccda46a3b63d",
+                    "batch.kubernetes.io/job-name": "hw3-256mi",
+                    "controller-uid": "2a8bf788-32c2-47f7-a475-ccda46a3b63d",
+                    "hw5/run": "hw3-256mi",
+                    "hw5/stage": "hw3-job",
+                    "job-name": "hw3-256mi"
+                },
+                "name": "hw3-256mi-888md",
+                "namespace": "hw5",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "Job",
+                        "name": "hw3-256mi",
+                        "uid": "2a8bf788-32c2-47f7-a475-ccda46a3b63d"
+                    }
+                ],
+                "resourceVersion": "977",
+                "uid": "8fb67a06-3579-4722-9ce6-8153e75da1c7"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "command": [
+                            "python",
+                            "-m",
+                            "hhlake.kube.memwatch",
+                            "--report-every",
+                            "0.5",
+                            "--",
+                            "python",
+                            "-m",
+                            "hhlake.mapreduce",
+                            "--workers",
+                            "8",
+                            "--workdir",
+                            "/work",
+                            "--output",
+                            "results/k8s/hw3-256mi"
+                        ],
+                        "env": [
+                            {
+                                "name": "S3_ENDPOINT",
+                                "value": "http://rustfs-lab:9000"
+                            }
+                        ],
+                        "envFrom": [
+                            {
+                                "secretRef": {
+                                    "name": "s3-credentials"
+                                }
+                            }
+                        ],
+                        "image": "hw5-hhlake:0.3.0",
+                        "imagePullPolicy": "Never",
+                        "name": "mapreduce",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "2",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/work",
+                                "name": "work"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8w42c",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "hw5-worker2",
+                "nodeSelector": {
+                    "hw5/pool": "batch"
+                },
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 1000,
+                "priorityClassName": "batch-low",
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "emptyDir": {},
+                        "name": "work"
+                    },
+                    {
+                        "name": "kube-api-access-8w42c",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-20T18:38:10Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-20T18:38:02Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-20T18:38:09Z",
+                        "observedGeneration": 1,
+                        "reason": "PodFailed",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-20T18:38:09Z",
+                        "observedGeneration": 1,
+                        "reason": "PodFailed",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-20T18:38:02Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "2",
+                            "memory": "256Mi"
+                        },
+                        "containerID": "containerd://a7756f0943a5896934314fcf149e9e0942a688a3592acedfd6d3b0d3d8552821",
+                        "image": "docker.io/library/hw5-hhlake:0.3.0",
+                        "imageID": "docker.io/library/import-2026-11-20@sha256:0069497cced1760e9e55fbf8f04201c7f61ca7a901e75110139b6b9a9b53dc17",
+                        "lastState": {},
+                        "name": "mapreduce",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "2",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "containerd://a7756f0943a5896934314fcf149e9e0942a688a3592acedfd6d3b0d3d8552821",
+                                "exitCode": 137,
+                                "finishedAt": "2026-11-20T18:38:08Z",
+                                "reason": "OOMKilled",
+                                "startedAt": "2026-11-20T18:38:03Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 10001,
+                                "supplementalGroups": [
+                                    10001
+                                ],
+                                "uid": 10001
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/work",
+                                "name": "work"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8w42c",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.24.0.3",
+                "hostIPs": [
+                    {
+                        "ip": "172.24.0.3"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Failed",
+                "podIP": "10.244.1.3",
+                "podIPs": [
+                    {
+                        "ip": "10.244.1.3"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-20T18:38:02Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

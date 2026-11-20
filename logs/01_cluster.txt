@@ -1,0 +1,119 @@
+﻿
+# Этап 0. kind v0.33.0 с GitHub, проверка sha256; kubectl - из Docker Desktop
+
+PS> (Get-FileHash "$Dl\kind-windows-amd64" -Algorithm SHA256).Hash.ToLower() -eq (Get-Content "$Dl\kind-windows-amd64.sha256sum").Split(" ")[0]
+True
+
+PS> kind version; kubectl version --client
+kind v0.33.0 go1.26.7 windows/amd64
+Client Version: v1.34.1
+Kustomize Version: v5.7.1
+
+PS> $cs = Get-CimInstance Win32_ComputerSystem; "host: $($cs.NumberOfLogicalProcessors) logical CPU, $([math]::Round($cs.TotalPhysicalMemory / 1GB, 1)) GiB RAM, $((Get-CimInstance Win32_OperatingSystem).Caption)"
+host: 12 logical CPU, 15.2 GiB RAM, Майкрософт Windows 11 Pro
+
+PS> docker info --format "Docker {{.ServerVersion}}, VM: {{.NCPU}} CPU, {{.MemTotal}} bytes RAM, cgroup v{{.CgroupVersion}}, kernel {{.KernelVersion}}"
+Docker 29.1.2, VM: 12 CPU, 7899131904 bytes RAM, cgroup v2, kernel 6.6.87.2-microsoft-standard-WSL2
+
+# Кластер: control-plane (на нём же хранилище) и два воркера; у воркеров system-reserved cpu=8, memory=5Gi, остаётся по 4 CPU для заданий
+
+PS> Get-Content cluster\kind.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: hw5
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.34.11@sha256:44e222ee2132dab25ff87301682f89eb82c7880ea3a1bf543bfe9708fd08d67d
+    labels:
+      hw5/pool: storage
+    extraPortMappings:
+      - containerPort: 30900
+        hostPort: 9100
+        listenAddress: "127.0.0.1"
+      - containerPort: 30901
+        hostPort: 9101
+        listenAddress: "127.0.0.1"
+  - role: worker
+    image: kindest/node:v1.34.11@sha256:44e222ee2132dab25ff87301682f89eb82c7880ea3a1bf543bfe9708fd08d67d
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "hw5/pool=batch"
+            system-reserved: "cpu=8,memory=5Gi"
+  - role: worker
+    image: kindest/node:v1.34.11@sha256:44e222ee2132dab25ff87301682f89eb82c7880ea3a1bf543bfe9708fd08d67d
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "hw5/pool=batch"
+            system-reserved: "cpu=8,memory=5Gi"
+
+PS> kind create cluster --config cluster\kind.yaml
+Creating cluster "hw5" ...
+ • Ensuring node image (kindest/node:v1.34.11) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.34.11) 🖼️
+ • Preparing nodes 📦 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-hw5"
+You can now use your cluster with:
+kubectl cluster-info --context kind-hw5
+Thanks for using kind! 😊
+
+PS> kc wait --for=condition=Ready nodes --all --timeout=180s
+node/hw5-control-plane condition met
+node/hw5-worker condition met
+node/hw5-worker2 condition met
+
+PS> kc get nodes -o wide
+NAME                STATUS   ROLES           AGE   VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                     CONTAINER-RUNTIME
+hw5-control-plane   Ready    control-plane   35s   v1.34.11   172.24.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.6.87.2-microsoft-standard-WSL2   containerd://2.3.4
+hw5-worker          Ready    <none>          17s   v1.34.11   172.24.0.4    <none>        Debian GNU/Linux 13 (trixie)   6.6.87.2-microsoft-standard-WSL2   containerd://2.3.4
+hw5-worker2         Ready    <none>          17s   v1.34.11   172.24.0.3    <none>        Debian GNU/Linux 13 (trixie)   6.6.87.2-microsoft-standard-WSL2   containerd://2.3.4
+
+PS> kc get nodes -o "custom-columns=NODE:.metadata.name,POOL:.metadata.labels.hw5/pool,CPU:.status.capacity.cpu,ALLOC_CPU:.status.allocatable.cpu,MEMORY:.status.capacity.memory,ALLOC_MEMORY:.status.allocatable.memory,TAINTS:.spec.taints[*].key"
+NODE                POOL      CPU   ALLOC_CPU   MEMORY      ALLOC_MEMORY   TAINTS
+hw5-control-plane   storage   12    12          7713996Ki   7713996Ki      node-role.kubernetes.io/control-plane
+hw5-worker          batch     12    4           7713996Ki   2471116Ki      <none>
+hw5-worker2         batch     12    4           7713996Ki   2471116Ki      <none>
+
+PS> kc get storageclass
+NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+standard (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  22s
+
+# Хранилище из ДЗ 2-3 (контейнер rustfs-lab, бакет hh-lake) подключаю к docker-сети kind: до переноса задания читают его по имени rustfs-lab
+
+PS> docker ps --filter name=rustfs-lab --format "{{.Names}} {{.Image}} {{.Status}}"
+rustfs-lab rustfs/rustfs:latest Up 5 minutes
+
+PS> docker network connect kind rustfs-lab; docker network inspect kind --format "{{range .Containers}}{{.Name}} {{.IPv4Address}}{{println}}{{end}}"
+rustfs-lab 172.24.0.5/16
+hw5-control-plane 172.24.0.2/16
+hw5-worker 172.24.0.4/16
+hw5-worker2 172.24.0.3/16
+
+PS> kc run dnscheck --image=busybox:1.37 --restart=Never --command '--' sh -c "nslookup rustfs-lab. | tail -3; wget -q -O - http://rustfs-lab:9000/health"
+pod/dnscheck created
+
+PS> kc wait --for=jsonpath="{.status.phase}=Succeeded" pod/dnscheck --timeout=120s
+pod/dnscheck condition met
+
+PS> kc logs dnscheck
+Name:	rustfs-lab
+Address: fc00:f853:ccd:e793::5
+
+{"status":"ok","service":"rustfs-endpoint","timestamp":"2026-11-20T18:34:39.785946644Z[Etc/Unknown]","version":"1.0.1"}
+

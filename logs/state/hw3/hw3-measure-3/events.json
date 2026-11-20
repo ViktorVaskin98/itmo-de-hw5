@@ -1,0 +1,777 @@
+﻿{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:02Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "hw3-256mi-888md",
+                "namespace": "hw5",
+                "resourceVersion": "949",
+                "uid": "8fb67a06-3579-4722-9ce6-8153e75da1c7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:02Z",
+            "message": "Successfully assigned hw5/hw3-256mi-888md to hw5-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:02Z",
+                "name": "hw3-256mi-888md.18e9d4c82c91be2f",
+                "namespace": "hw5",
+                "resourceVersion": "953",
+                "uid": "70718d18-673f-4ac5-83fc-b6b06ece6c68"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:03Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-256mi-888md",
+                "namespace": "hw5",
+                "resourceVersion": "952",
+                "uid": "8fb67a06-3579-4722-9ce6-8153e75da1c7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:03Z",
+            "message": "Container image \"hw5-hhlake:0.3.0\" already present on machine",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:03Z",
+                "name": "hw3-256mi-888md.18e9d4c85ce7ceae",
+                "namespace": "hw5",
+                "resourceVersion": "955",
+                "uid": "8b36c936-4bed-4022-8728-c840cd2cd9dd"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:03Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-256mi-888md",
+                "namespace": "hw5",
+                "resourceVersion": "952",
+                "uid": "8fb67a06-3579-4722-9ce6-8153e75da1c7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:03Z",
+            "message": "Created container: mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:03Z",
+                "name": "hw3-256mi-888md.18e9d4c85fde3783",
+                "namespace": "hw5",
+                "resourceVersion": "956",
+                "uid": "242e37d7-38f5-4c28-86d7-782d7cf993a1"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:03Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-256mi-888md",
+                "namespace": "hw5",
+                "resourceVersion": "952",
+                "uid": "8fb67a06-3579-4722-9ce6-8153e75da1c7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:03Z",
+            "message": "Started container mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:03Z",
+                "name": "hw3-256mi-888md.18e9d4c869902827",
+                "namespace": "hw5",
+                "resourceVersion": "957",
+                "uid": "48a6f5aa-8a4f-4c55-be35-825689144f75"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:02Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-256mi",
+                "namespace": "hw5",
+                "resourceVersion": "948",
+                "uid": "2a8bf788-32c2-47f7-a475-ccda46a3b63d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:02Z",
+            "message": "Created pod: hw3-256mi-888md",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:02Z",
+                "name": "hw3-256mi.18e9d4c82b541f86",
+                "namespace": "hw5",
+                "resourceVersion": "951",
+                "uid": "3bd4581c-37a1-44df-b628-31f85b993904"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:11Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-256mi",
+                "namespace": "hw5",
+                "resourceVersion": "976",
+                "uid": "2a8bf788-32c2-47f7-a475-ccda46a3b63d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:11Z",
+            "message": "Container mapreduce for pod hw5/hw3-256mi-888md failed with exit code 137 matching FailJob rule at index 0",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:11Z",
+                "name": "hw3-256mi.18e9d4ca4b1403f4",
+                "namespace": "hw5",
+                "resourceVersion": "979",
+                "uid": "540615bd-6876-4023-8af8-8802de2ac303"
+            },
+            "reason": "PodFailurePolicy",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:15Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "hw3-measure-1-tg2hz",
+                "namespace": "hw5",
+                "resourceVersion": "985",
+                "uid": "8de38fd3-ec7b-40ee-96ee-a0e2e5f90912"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:15Z",
+            "message": "Successfully assigned hw5/hw3-measure-1-tg2hz to hw5-worker",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:15Z",
+                "name": "hw3-measure-1-tg2hz.18e9d4cb18bd134b",
+                "namespace": "hw5",
+                "resourceVersion": "989",
+                "uid": "1de1657e-bd3d-4544-8d6e-3fce17d903ef"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:15Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-1-tg2hz",
+                "namespace": "hw5",
+                "resourceVersion": "987",
+                "uid": "8de38fd3-ec7b-40ee-96ee-a0e2e5f90912"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:15Z",
+            "message": "Container image \"hw5-hhlake:0.3.0\" already present on machine",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:15Z",
+                "name": "hw3-measure-1-tg2hz.18e9d4cb3e02f66c",
+                "namespace": "hw5",
+                "resourceVersion": "993",
+                "uid": "416301b0-fd70-43b8-b616-0b344aa09273"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:15Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-1-tg2hz",
+                "namespace": "hw5",
+                "resourceVersion": "987",
+                "uid": "8de38fd3-ec7b-40ee-96ee-a0e2e5f90912"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:15Z",
+            "message": "Created container: mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:15Z",
+                "name": "hw3-measure-1-tg2hz.18e9d4cb40a39ae5",
+                "namespace": "hw5",
+                "resourceVersion": "994",
+                "uid": "2aed8939-40ca-4ce5-b63c-f7e8b0e7fdbb"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-1-tg2hz",
+                "namespace": "hw5",
+                "resourceVersion": "987",
+                "uid": "8de38fd3-ec7b-40ee-96ee-a0e2e5f90912"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:16Z",
+            "message": "Started container mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:16Z",
+                "name": "hw3-measure-1-tg2hz.18e9d4cb4a6f3be3",
+                "namespace": "hw5",
+                "resourceVersion": "995",
+                "uid": "5d7d8883-34e0-4257-ab57-ee7bbea16a61"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:15Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-1",
+                "namespace": "hw5",
+                "resourceVersion": "984",
+                "uid": "e4712c32-428c-4386-9955-d643f679683c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:15Z",
+            "message": "Created pod: hw3-measure-1-tg2hz",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:15Z",
+                "name": "hw3-measure-1.18e9d4cb181d7b86",
+                "namespace": "hw5",
+                "resourceVersion": "986",
+                "uid": "c1f507db-8e55-4ac5-959f-0a3c7204648a"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:51Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-1",
+                "namespace": "hw5",
+                "resourceVersion": "1054",
+                "uid": "e4712c32-428c-4386-9955-d643f679683c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:51Z",
+            "message": "Job completed",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:51Z",
+                "name": "hw3-measure-1.18e9d4d378b52c65",
+                "namespace": "hw5",
+                "resourceVersion": "1057",
+                "uid": "2830efbc-ef16-49c1-931f-b46b5c8d1dd4"
+            },
+            "reason": "Completed",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "hw3-measure-2-m9nn5",
+                "namespace": "hw5",
+                "resourceVersion": "1062",
+                "uid": "3227e889-7b59-4e8d-b94a-2499e3df3b2b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:52Z",
+            "message": "Successfully assigned hw5/hw3-measure-2-m9nn5 to hw5-worker",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:52Z",
+                "name": "hw3-measure-2-m9nn5.18e9d4d3e0ff1e8d",
+                "namespace": "hw5",
+                "resourceVersion": "1066",
+                "uid": "759416ab-bfe6-4f20-9712-2553d1e6e4ae"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-2-m9nn5",
+                "namespace": "hw5",
+                "resourceVersion": "1065",
+                "uid": "3227e889-7b59-4e8d-b94a-2499e3df3b2b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:53Z",
+            "message": "Container image \"hw5-hhlake:0.3.0\" already present on machine",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:53Z",
+                "name": "hw3-measure-2-m9nn5.18e9d4d409029766",
+                "namespace": "hw5",
+                "resourceVersion": "1069",
+                "uid": "6f6ccfd1-5512-4ced-990b-46a18bb130d5"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-2-m9nn5",
+                "namespace": "hw5",
+                "resourceVersion": "1065",
+                "uid": "3227e889-7b59-4e8d-b94a-2499e3df3b2b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:53Z",
+            "message": "Created container: mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:53Z",
+                "name": "hw3-measure-2-m9nn5.18e9d4d40bc7a28b",
+                "namespace": "hw5",
+                "resourceVersion": "1070",
+                "uid": "98c943d6-56ab-4840-b20b-b53d906cfdf0"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-2-m9nn5",
+                "namespace": "hw5",
+                "resourceVersion": "1065",
+                "uid": "3227e889-7b59-4e8d-b94a-2499e3df3b2b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:53Z",
+            "message": "Started container mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:53Z",
+                "name": "hw3-measure-2-m9nn5.18e9d4d417689202",
+                "namespace": "hw5",
+                "resourceVersion": "1071",
+                "uid": "3970a9bd-d17e-49e3-a450-4358422b72cd"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:38:52Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-2",
+                "namespace": "hw5",
+                "resourceVersion": "1061",
+                "uid": "dc41c8fb-da1a-4a46-9896-2dc517a6590d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:38:52Z",
+            "message": "Created pod: hw3-measure-2-m9nn5",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:38:52Z",
+                "name": "hw3-measure-2.18e9d4d3df567c4a",
+                "namespace": "hw5",
+                "resourceVersion": "1063",
+                "uid": "e1a48108-112e-4f9f-9fce-e1df5c5ed8dd"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:30Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-2",
+                "namespace": "hw5",
+                "resourceVersion": "1131",
+                "uid": "dc41c8fb-da1a-4a46-9896-2dc517a6590d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:30Z",
+            "message": "Job completed",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:30Z",
+                "name": "hw3-measure-2.18e9d4dc9248daa7",
+                "namespace": "hw5",
+                "resourceVersion": "1134",
+                "uid": "824e229b-9044-4a6f-b505-4f8019c1b1e7"
+            },
+            "reason": "Completed",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:32Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "hw3-measure-3-c9crc",
+                "namespace": "hw5",
+                "resourceVersion": "1142",
+                "uid": "d87b5da9-65d8-41f7-9712-4fa0a870bf18"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:32Z",
+            "message": "Successfully assigned hw5/hw3-measure-3-c9crc to hw5-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:32Z",
+                "name": "hw3-measure-3-c9crc.18e9d4dd26b85027",
+                "namespace": "hw5",
+                "resourceVersion": "1146",
+                "uid": "b8ef6ee2-bb5f-48ed-9921-e379ad25559e"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:33Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-3-c9crc",
+                "namespace": "hw5",
+                "resourceVersion": "1143",
+                "uid": "d87b5da9-65d8-41f7-9712-4fa0a870bf18"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:33Z",
+            "message": "Container image \"hw5-hhlake:0.3.0\" already present on machine",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:33Z",
+                "name": "hw3-measure-3-c9crc.18e9d4dd4feb89a2",
+                "namespace": "hw5",
+                "resourceVersion": "1148",
+                "uid": "3d04656e-273a-473a-ba26-688c01ed9f28"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:33Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-3-c9crc",
+                "namespace": "hw5",
+                "resourceVersion": "1143",
+                "uid": "d87b5da9-65d8-41f7-9712-4fa0a870bf18"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:33Z",
+            "message": "Created container: mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:33Z",
+                "name": "hw3-measure-3-c9crc.18e9d4dd533adcb6",
+                "namespace": "hw5",
+                "resourceVersion": "1149",
+                "uid": "6ae76d89-d65c-4677-addb-a2bcd2989e14"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:33Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{mapreduce}",
+                "kind": "Pod",
+                "name": "hw3-measure-3-c9crc",
+                "namespace": "hw5",
+                "resourceVersion": "1143",
+                "uid": "d87b5da9-65d8-41f7-9712-4fa0a870bf18"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:33Z",
+            "message": "Started container mapreduce",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:33Z",
+                "name": "hw3-measure-3-c9crc.18e9d4dd5f3811c4",
+                "namespace": "hw5",
+                "resourceVersion": "1150",
+                "uid": "981f9add-27cd-4c29-a63d-6005aedd4df0"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "hw5-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "hw5-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:39:32Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-3",
+                "namespace": "hw5",
+                "resourceVersion": "1141",
+                "uid": "404a5994-b338-4f93-a41c-d080d9571a8b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:39:32Z",
+            "message": "Created pod: hw3-measure-3-c9crc",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:39:32Z",
+                "name": "hw3-measure-3.18e9d4dd260ccdab",
+                "namespace": "hw5",
+                "resourceVersion": "1144",
+                "uid": "bafa2ecc-feb6-4ed9-921d-ec832a2643cd"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-20T18:40:20Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "hw3-measure-3",
+                "namespace": "hw5",
+                "resourceVersion": "1224",
+                "uid": "404a5994-b338-4f93-a41c-d080d9571a8b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-20T18:40:20Z",
+            "message": "Job completed",
+            "metadata": {
+                "creationTimestamp": "2026-11-20T18:40:20Z",
+                "name": "hw3-measure-3.18e9d4e82ebe65c9",
+                "namespace": "hw5",
+                "resourceVersion": "1227",
+                "uid": "0357a939-2974-4807-9cee-fb0bac5c5892"
+            },
+            "reason": "Completed",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

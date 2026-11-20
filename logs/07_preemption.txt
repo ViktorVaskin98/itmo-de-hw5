@@ -1,0 +1,183 @@
+﻿
+# Этап 4б. Вытеснение: фоновый расчёт low (batch-low, сплиты по 128 MiB - 7 задач по ~20 с, по 1 CPU) занимает оба воркера: по 3 пода, свободно по 0,9 CPU. Срочный расчёт из ДЗ 3 (batch-high, requests 2 CPU, предел 704Mi из этапа 1) приходит, когда места нет
+
+PS> kc get priorityclass -o "custom-columns=NAME:.metadata.name,VALUE:.value,PREEMPTION:.preemptionPolicy,GLOBAL_DEFAULT:.globalDefault"
+NAME                      VALUE        PREEMPTION             GLOBAL_DEFAULT
+batch-high                100000       PreemptLowerPriority   <none>
+batch-low                 1000         PreemptLowerPriority   <none>
+storage-critical          1000000      PreemptLowerPriority   <none>
+system-cluster-critical   2000000000   PreemptLowerPriority   <none>
+system-node-critical      2000001000   PreemptLowerPriority   <none>
+
+PS> Start-Map $low
+job.batch/low-map created
+
+PS> Wait-Running hw5 "hw5/run=low" 6
+6 pods Running at 18:49:53 UTC
+
+PS> Pods hw5 "hw5/run=low" | Select-Object -First 10
+POD               PRIORITY    PHASE     NODE          NOMINATED   CPU
+low-map-0-7rdmm   batch-low   Running   hw5-worker    <none>      1
+low-map-1-w82lk   batch-low   Running   hw5-worker    <none>      1
+low-map-2-w5zh2   batch-low   Running   hw5-worker2   <none>      1
+low-map-3-dxx4b   batch-low   Running   hw5-worker    <none>      1
+low-map-4-pg58l   batch-low   Running   hw5-worker2   <none>      1
+low-map-5-kj9jn   batch-low   Pending   <none>        <none>      1
+low-map-6-68j92   batch-low   Running   hw5-worker2   <none>      1
+
+PS> Submit "10-hw3-job.yaml" $Urgent "urgent"; kc -n hw5 get job urgent -o "jsonpath=job urgent created {.metadata.creationTimestamp}"
+job.batch/urgent created
+job urgent created 2026-11-20T18:50:00Z
+
+PS> Watch-Disruption hw5 "hw5/run=low" 10 "low"
+2026-11-20T18:50:01Z low-map-2-w5zh2 on hw5-worker2, phase Running: DisruptionTarget PreemptionByScheduler - default-scheduler: preempting to accommodate a higher priority pod
+2026-11-20T18:50:00Z low-map-6-68j92 on hw5-worker2, phase Running: DisruptionTarget PreemptionByScheduler - default-scheduler: preempting to accommodate a higher priority pod
+low-map-2-w5zh2: last seen Failed, container exit code 143 (Error), finished 2026-11-20T18:50:02Z
+low-map-6-68j92: last seen Failed, container exit code 143 (Error), finished 2026-11-20T18:50:01Z
+pods with DisruptionTarget: 2
+
+PS> Pods hw5 "hw5/run in (low, urgent)"
+POD               PRIORITY     PHASE       NODE          NOMINATED   CPU
+low-map-0-7rdmm   batch-low    Succeeded   hw5-worker    <none>      1
+low-map-1-w82lk   batch-low    Succeeded   hw5-worker    <none>      1
+low-map-2-w5zh2   batch-low    Failed      hw5-worker2   <none>      1
+low-map-3-dxx4b   batch-low    Succeeded   hw5-worker    <none>      1
+low-map-4-pg58l   batch-low    Succeeded   hw5-worker2   <none>      1
+low-map-5-kj9jn   batch-low    Running     hw5-worker2   <none>      1
+low-map-6-68j92   batch-low    Failed      hw5-worker2   <none>      1
+urgent-6qbcr      batch-high   Running     hw5-worker2   <none>      2
+low-map-6-65gkt   batch-low    Pending     hw5-worker    <none>      1
+
+PS> kc -n hw5 get events --field-selector reason=Preempted -o "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,MESSAGE:.message"
+LAST                   POD               MESSAGE
+2026-11-20T18:50:01Z   low-map-2-w5zh2   Preempted by pod b6fb7a72-3daf-4d22-af4e-04c98754e3c1 on node hw5-worker2
+2026-11-20T18:50:00Z   low-map-6-68j92   Preempted by pod b6fb7a72-3daf-4d22-af4e-04c98754e3c1 on node hw5-worker2
+
+PS> "job/urgent -> $(Wait-JobDone hw5 urgent)"
+job/urgent -> Complete
+
+PS> Show-Log hw5 job/urgent "^\[mem-json\]|^\[mem\] +\d|^ {3,}\d"
+[mem] pod urgent-6qbcr: memory.max 704 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-185009-786c38
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/urgent/ (0.11 s)
+[master] map phase: 13.25 s, 26 attempts, 0 failed
+[master] reduce phase: 1.69 s, 4 attempts, 0 failed
+[master] worker processes spawned: 8 (reused across tasks)
+[master] fetched 849,257,809 bytes (1.0019 x input), lines 229,388, csv-parsed 87,803
+[master] variant vacancies: 3,816, with key_skills: 2,951
+[master] map CPU time, all tasks: 16.8 s
+stack        emitted  after combine  distinct   sum count
+skills        16,801          5,626     1,504      16,801
+pairs         60,044         40,738    16,730      60,044
+triples      200,072        169,890    82,458     200,072
+-- top skills
+-- top pairs
+-- top triples
+[master] output s3://hh-lake/results/k8s/urgent/{skills,pairs,triples}/part-r-*.csv, total 16.54 s
+[mem] exit code 0, wall 18.6 s
+[mem] peak: memory.peak 551 MiB; sampled every 0.1 s: current 549 MiB, anon 530 MiB, file 9 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 42.7 s over 18.6 s wall (2.30 CPU avg); throttled 16.0 s in 64 of 184 periods
+[mem-summary] {"pod": "urgent-6qbcr", "exit": 0, "wall": 18.60307611199096, "memory_max": 738197504, "memory_peak": 577560576, "sampled": {"current": 575205376, "anon": 555274240, "file": 9150464}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 42.697571, "cpu_throttled": 16.000058}
+
+PS> Submit "33-verify-job.yaml" @{ NAME = "urgent-verify"; NAMESPACE = "hw5"; PRIORITY = "batch-high"; PREFIX = "results/k8s/urgent" } "urgent-verify"; "job/urgent-verify -> $(Wait-JobDone hw5 urgent-verify)"
+job.batch/urgent-verify created
+job/urgent-verify -> Complete
+
+PS> Show-Log hw5 job/urgent-verify
+A = MapReduce s3://hh-lake/results/k8s/urgent/
+B = MapReduce s3://hh-lake/results/hw3/mapreduce/
+variant vacancies: A 3,816 / B 3,816; with key_skills: A 2,951 / B 2,951  MATCH
+stack      A rows     A sum   B rows     B sum  only A  only B  diff
+skills      1,504    16,801    1,504    16,801       0       0     0  MATCH
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+# Фоновый расчёт после вытеснения: обёртка memwatch переслала SIGTERM процессу map, вытесненные поды завершились с кодом 143 и условием DisruptionTarget; по правилу podFailurePolicy Ignore их индексы созданы заново без траты backoffLimitPerIndex, а сами поды Job-контроллер удалил
+
+PS> Complete-Run $low
+map: Complete
+job.batch/low-reduce created
+reduce: Complete
+job.batch/low-commit created
+commit: Complete
+
+PS> kc -n hw5 get pods -l hw5/run=low -o "custom-columns=POD:.metadata.name,INDEX:.metadata.annotations.batch\.kubernetes\.io/job-completion-index,NODE:.spec.nodeName,PHASE:.status.phase" --sort-by=.metadata.creationTimestamp
+POD                  INDEX    NODE          PHASE
+low-map-0-7rdmm      0        hw5-worker    Succeeded
+low-map-1-w82lk      1        hw5-worker    Succeeded
+low-map-3-dxx4b      3        hw5-worker    Succeeded
+low-map-4-pg58l      4        hw5-worker2   Succeeded
+low-map-5-kj9jn      5        hw5-worker2   Succeeded
+low-map-6-65gkt      6        hw5-worker    Succeeded
+low-map-2-62f9f      2        hw5-worker    Succeeded
+low-reduce-0-wlqhd   0        hw5-worker2   Succeeded
+low-reduce-1-r8ngk   1        hw5-worker    Succeeded
+low-reduce-2-8qlwd   2        hw5-worker    Succeeded
+low-reduce-3-pcd9t   3        hw5-worker2   Succeeded
+low-commit-ztz6f     <none>   hw5-worker    Succeeded
+
+PS> Show-Job hw5 low-map
+JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END
+low-map   7             7           <none>   2026-11-20T18:49:51Z   2026-11-20T18:50:27Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+
+PS> uvpy tools\timeline.py logs\state\runs\low logs\state\runs\urgent
+times in seconds from 18:49:51 UTC: created, scheduled, started, finished
+pod                     node          created  sched  start    end  pending  result
+low-map-0-7rdmm         hw5-worker          0      0      1     17       0s  Completed
+low-map-1-w82lk         hw5-worker          0      0      1     16       0s  Completed
+low-map-2-w5zh2         hw5-worker2         0      0      1     11       0s  preempted
+low-map-3-dxx4b         hw5-worker          0      0      1     16       0s  Completed
+low-map-4-pg58l         hw5-worker2         0      0      1     16       0s  Completed
+low-map-5-kj9jn         hw5-worker2         0     18     20     34      18s  Completed
+low-map-6-68j92         hw5-worker2         0      0      1     10       0s  preempted
+urgent-6qbcr            hw5-worker2         9     13     16     35       4s  Completed
+low-map-6-65gkt         hw5-worker         20     20     21     32       0s  Completed
+low-map-2-62f9f         hw5-worker         21     21     22     33       0s  Completed
+low-reduce-0-wlqhd      hw5-worker2        49     49     50     53       0s  Completed
+low-reduce-1-r8ngk      hw5-worker         49     49     50     53       0s  Completed
+low-reduce-2-8qlwd      hw5-worker         49     49     50     53       0s  Completed
+low-reduce-3-pcd9t      hw5-worker2        49     49     50     53       0s  Completed
+low-commit-ztz6f        hw5-worker         56     56     57     62       0s  Completed
+low/map: 9 pods (2 preempted), 34 s from first create to last finish, max 6 running at once, pending max 18 s / mean 2.0 s, nodes hw5-worker, hw5-worker2
+urgent/hw3-job: 1 pods (0 preempted), 26 s from first create to last finish, max 1 running at once, pending max 4 s / mean 4.0 s, nodes hw5-worker2
+low/reduce: 4 pods (0 preempted), 4 s from first create to last finish, max 4 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+low/commit: 1 pods (0 preempted), 6 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker
+
+PS> Show-Log hw5 job/low-commit | Select-Object -Last 15
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+PS> Storage-Memory
+rustfs-0: restarts 0, memory.current 3339 MiB, anon 1726 MiB, memory.peak 3796 MiB, memory.max 4096 MiB, memory.events low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,
+

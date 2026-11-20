@@ -1,0 +1,13 @@
+﻿[mem] pod probe-map-22: memory.max 512 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 16576512, "anon": 15429632, "file": 24576, "kernel": 593920}
+[map m0022 probe-map-22] split 23/26: bytes 738,197,504-771,751,936 of s3://hh-lake/raw/it_vacancies_2024.csv
+[mem]    5.1 s  current     75 MiB  anon     71  file     0  kernel    3
+[mem-json] {"t": 5.07, "current": 78471168, "anon": 74575872, "file": 24576, "kernel": 3608576}
+[map m0022 probe-map-22] stats {"split": 22, "attempt": 1, "bytes_fetched": 33619969, "cpu_seconds": 0.7777529250000002, "lines": 8817, "parsed": 3399, "in_variant": 149, "with_skills": 112, "emitted": {"1": 686, "2": 2649, "3": 10190}, "written": {"1": 262, "2": 2038, "3": 9780}}
+[map m0022 probe-map-22] uploaded 246,082 bytes to s3://hh-lake/shuffle/probe/m0022/; plan 0.56 s, map 4.15 s, upload 1.55 s
+[mem] exit code 0, wall 8.6 s
+[mem] peak: memory.peak 79 MiB; sampled every 0.1 s: current 78 MiB, anon 73 MiB, file 0 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 4.0 s over 8.6 s wall (0.47 CPU avg); throttled 0.0 s in 11 of 84 periods
+[mem-summary] {"pod": "probe-map-22", "exit": 0, "wall": 8.618933835998178, "memory_max": 536870912, "memory_peak": 82972672, "sampled": {"current": 82108416, "anon": 76238848, "file": 299008}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 4.03031, "cpu_throttled": 0.026579}

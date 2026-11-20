@@ -1,0 +1,210 @@
+﻿
+# Этап 4б. Вытеснение: фоновый расчёт low (batch-low, 8 подов по 1 CPU) занимает оба воркера целиком; срочный расчёт из ДЗ 3 (batch-high, requests 2 CPU, предел 704Mi из этапа 1) приходит, когда свободного CPU нет
+
+PS> kc get priorityclass -o "custom-columns=NAME:.metadata.name,VALUE:.value,PREEMPTION:.preemptionPolicy,DESCRIPTION:.description"
+NAME                      VALUE        PREEMPTION             DESCRIPTION
+batch-high                100000       PreemptLowerPriority   Срочные расчёты, вытесняют batch-low
+batch-low                 1000         PreemptLowerPriority   Фоновые расчёты, их можно вытеснить
+storage-critical          1000000      PreemptLowerPriority   Хранилище RustFS: расчёты его не вытесняют
+system-cluster-critical   2000000000   PreemptLowerPriority   Used for system critical pods that must run in the cluster, but can be moved to another node if necessary.
+system-node-critical      2000001000   PreemptLowerPriority   Used for system critical pods that must not be moved from their current node.
+
+PS> Start-Map $low
+job.batch/low-map created
+
+PS> Wait-Running hw5 "hw5/run=low" 8
+timeout waiting for 8 Running pods
+
+PS> Pods hw5 "hw5/run=low" | Select-Object -First 10
+POD                PRIORITY    PHASE       NODE          NOMINATED   CPU
+low-map-6-zpd62    batch-low   Failed      hw5-worker2   <none>      1
+low-map-0-q47vz    batch-low   Failed      hw5-worker    <none>      1
+low-map-7-jdsck    batch-low   Failed      hw5-worker2   <none>      1
+low-map-1-88dvn    batch-low   Failed      hw5-worker2   <none>      1
+low-map-2-g67vz    batch-low   Failed      hw5-worker2   <none>      1
+low-map-3-9wrjx    batch-low   Failed      hw5-worker    <none>      1
+low-map-4-hf2zd    batch-low   Failed      hw5-worker    <none>      1
+low-map-5-lwgcx    batch-low   Failed      hw5-worker2   <none>      1
+low-map-2-tmpzb    batch-low   Failed      hw5-worker    <none>      1
+
+PS> Submit "10-hw3-job.yaml" $Urgent "urgent"; "submitted at $(Stamp)"
+job.batch/urgent created
+submitted at 18:52:34
+
+PS> Pods hw5 "hw5/run in (low, urgent)" | Select-Object -First 14
+POD                PRIORITY     PHASE       NODE          NOMINATED   CPU
+low-map-6-zpd62    batch-low    Failed      hw5-worker2   <none>      1
+low-map-0-q47vz    batch-low    Failed      hw5-worker    <none>      1
+low-map-7-jdsck    batch-low    Failed      hw5-worker2   <none>      1
+low-map-1-88dvn    batch-low    Failed      hw5-worker2   <none>      1
+low-map-2-g67vz    batch-low    Failed      hw5-worker2   <none>      1
+low-map-3-9wrjx    batch-low    Failed      hw5-worker    <none>      1
+low-map-4-hf2zd    batch-low    Failed      hw5-worker    <none>      1
+low-map-5-lwgcx    batch-low    Failed      hw5-worker2   <none>      1
+low-map-2-tmpzb    batch-low    Failed      hw5-worker    <none>      1
+low-map-5-75vv2    batch-low    Failed      hw5-worker2   <none>      1
+low-map-3-7wvh6    batch-low    Failed      hw5-worker    <none>      1
+low-map-4-ldnnt    batch-low    Failed      hw5-worker    <none>      1
+low-map-1-f69d7    batch-low    Failed      hw5-worker    <none>      1
+
+PS> kc -n hw5 get events --field-selector reason=Preempted -o "custom-columns=LAST:.lastTimestamp,POD:.involvedObject.name,MESSAGE:.message"
+LAST   POD   MESSAGE
+
+PS> "job/urgent -> $(Wait-JobDone hw5 urgent)"
+job/urgent -> Complete
+
+PS> Show-Log hw5 job/urgent "^\[mem-json\]|^\[mem\] +\d|^ {3,}\d"
+[mem] pod urgent-fff29: memory.max 704 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-155233-4f6104
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/urgent/ (0.12 s)
+[master] map phase: 21.28 s, 26 attempts, 0 failed
+[master] reduce phase: 1.13 s, 4 attempts, 0 failed
+[master] worker processes spawned: 8 (reused across tasks)
+[master] fetched 849,257,809 bytes (1.0019 x input), lines 229,388, csv-parsed 87,803
+[master] variant vacancies: 3,816, with key_skills: 2,951
+[master] map CPU time, all tasks: 27.1 s
+stack        emitted  after combine  distinct   sum count
+skills        16,801          5,626     1,504      16,801
+pairs         60,044         40,738    16,730      60,044
+triples      200,072        169,890    82,458     200,072
+-- top skills
+-- top pairs
+-- top triples
+[master] output s3://hh-lake/results/k8s/urgent/{skills,pairs,triples}/part-r-*.csv, total 23.97 s
+[mem] exit code 0, wall 25.7 s
+[mem] peak: memory.peak 542 MiB; sampled every 0.1 s: current 541 MiB, anon 517 MiB, file 18 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 55.8 s over 25.7 s wall (2.17 CPU avg); throttled 4.6 s in 83 of 257 periods
+[mem-summary] {"pod": "urgent-fff29", "exit": 0, "wall": 25.68715426500421, "memory_max": 738197504, "memory_peak": 567922688, "sampled": {"current": 567304192, "anon": 541949952, "file": 18485248}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 55.83988, "cpu_throttled": 4.563023}
+
+PS> Submit "33-verify-job.yaml" @{ NAME = "urgent-verify"; NAMESPACE = "hw5"; PRIORITY = "batch-high"; PREFIX = "results/k8s/urgent" } "urgent-verify"; "job/urgent-verify -> $(Wait-JobDone hw5 urgent-verify)"
+job.batch/urgent-verify created
+job/urgent-verify -> Complete
+
+PS> Show-Log hw5 job/urgent-verify
+A = MapReduce s3://hh-lake/results/k8s/urgent/
+B = MapReduce s3://hh-lake/results/hw3/mapreduce/
+variant vacancies: A 3,816 / B 3,816; with key_skills: A 2,951 / B 2,951  MATCH
+stack      A rows     A sum   B rows     B sum  only A  only B  diff
+skills      1,504    16,801    1,504    16,801       0       0     0  MATCH
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+# Фоновый расчёт после вытеснения: вытесненные поды получили условие DisruptionTarget, по правилу podFailurePolicy Ignore их индексы перезапущены без траты backoffLimitPerIndex
+
+PS> Complete-Run $low
+map: Complete
+job.batch/low-reduce created
+reduce: Complete
+job.batch/low-commit created
+commit: Complete
+
+PS> kc -n hw5 get pods -l hw5/run=low --field-selector status.phase=Failed -o "custom-columns=POD:.metadata.name,NODE:.spec.nodeName,EXIT:.status.containerStatuses[0].state.terminated.exitCode,REASON:.status.conditions[?(@.type=='DisruptionTarget')].reason,MESSAGE:.status.conditions[?(@.type=='DisruptionTarget')].message"
+POD               NODE          EXIT   REASON   MESSAGE
+low-map-0-q47vz   hw5-worker    1      <none>   <none>
+low-map-0-zxv98   hw5-worker2   1      <none>   <none>
+low-map-1-88dvn   hw5-worker2   1      <none>   <none>
+low-map-1-f69d7   hw5-worker    1      <none>   <none>
+low-map-2-g67vz   hw5-worker2   1      <none>   <none>
+low-map-2-tmpzb   hw5-worker    1      <none>   <none>
+low-map-3-7wvh6   hw5-worker    1      <none>   <none>
+low-map-3-9wrjx   hw5-worker    1      <none>   <none>
+low-map-4-hf2zd   hw5-worker    1      <none>   <none>
+low-map-4-ldnnt   hw5-worker    1      <none>   <none>
+low-map-5-75vv2   hw5-worker2   1      <none>   <none>
+low-map-5-lwgcx   hw5-worker2   1      <none>   <none>
+low-map-6-zpd62   hw5-worker2   1      <none>   <none>
+low-map-7-jdsck   hw5-worker2   1      <none>   <none>
+
+PS> Show-Job hw5 low-map
+JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END
+low-map   26            26          14       2026-11-20T15:50:26Z   2026-11-20T15:51:57Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+
+PS> uvpy tools\timeline.py logs\state\runs\low logs\state\runs\urgent
+times in seconds from 15:50:26 UTC: created, scheduled, started, finished
+pod                     node          created  sched  start    end  pending  result
+low-map-0-q47vz         hw5-worker          0      0      4     28       0s  Error
+low-map-1-88dvn         hw5-worker2         0      0      4     28       0s  Error
+low-map-2-g67vz         hw5-worker2         0      0      4     23       0s  Error
+low-map-3-9wrjx         hw5-worker          0      0      4     25       0s  Error
+low-map-4-hf2zd         hw5-worker          0      0      4     28       0s  Error
+low-map-5-lwgcx         hw5-worker2         0      0      4     24       0s  Error
+low-map-6-zpd62         hw5-worker2         0     28     29     33      28s  Error
+low-map-7-jdsck         hw5-worker2         0     28     29     33      28s  Error
+low-map-2-tmpzb         hw5-worker         33     33     31     35       0s  Error
+low-map-5-75vv2         hw5-worker2        34     34     35     38       0s  Error
+low-map-3-7wvh6         hw5-worker         35     35     36     39       0s  Error
+low-map-0-zxv98         hw5-worker2        38     38     39     41       0s  Error
+low-map-1-f69d7         hw5-worker         38     38     39     42       0s  Error
+low-map-4-ldnnt         hw5-worker         38     38     39     41       0s  Error
+low-map-6-z9fj4         hw5-worker2        43     43     44     47       0s  Completed
+low-map-7-qnz6r         hw5-worker         43     43     44     47       0s  Completed
+low-map-8-trnrh         hw5-worker2        50     50     50     55       0s  Completed
+low-map-9-rv9qk         hw5-worker         50     50     50     55       0s  Completed
+low-map-2-72xnz         hw5-worker2        55     55     55     58       0s  Completed
+low-map-10-p9j2q        hw5-worker2        58     58     58     62       0s  Completed
+low-map-11-64thk        hw5-worker         58     58     59     62       0s  Completed
+low-map-5-dxdmw         hw5-worker         58     58     58     62       0s  Completed
+low-map-3-b6mzc         hw5-worker         59     59     60     62       0s  Completed
+low-map-0-mc9vv         hw5-worker2        61     61     60     65       0s  Completed
+low-map-12-p7qlg        hw5-worker2        61     61     60     65       0s  Completed
+low-map-4-gz24j         hw5-worker         61     64     65     70       3s  Completed
+low-map-1-j2mnv         hw5-worker2        62     65     66     71       3s  Completed
+low-map-13-xb2nj        hw5-worker         65     65     66     71       0s  Completed
+low-map-14-xllr7        hw5-worker         65     65     66     72       0s  Completed
+low-map-15-wqr7k        hw5-worker2        66     66     69     75       0s  Completed
+low-map-16-t2vwf        hw5-worker2        66     67     69     76       1s  Completed
+low-map-17-zxmjf        hw5-worker         67     74     77     84       7s  Completed
+low-map-18-rdtjj        hw5-worker2        67     74     77     85       7s  Completed
+low-map-19-gzb9f        hw5-worker         75     75     78     85       0s  Completed
+low-map-20-gqrnw        hw5-worker         75     75     78     85       0s  Completed
+low-map-21-vxsfm        hw5-worker2        75     78     79     86       3s  Completed
+low-map-22-vfwcr        hw5-worker2        76     78     79     87       2s  Completed
+low-map-23-nxk6f        hw5-worker         78     86     87     88       8s  Completed
+low-map-24-ngtnh        hw5-worker2        78     87     86     89       9s  Completed
+low-map-25-8557c        hw5-worker         87     87     86     89       0s  Completed
+urgent-fff29            hw5-worker        124    124    125    149       0s  Completed
+low-reduce-0-tww6x      hw5-worker2       169    169    171    179       0s  Completed
+low-reduce-1-5vtmm      hw5-worker        169    169    171    179       0s  Completed
+low-reduce-2-f7ttx      hw5-worker2       169    169    171    179       0s  Completed
+low-reduce-3-7w9kn      hw5-worker        169    169    171    179       0s  Completed
+low-commit-n8qst        hw5-worker2       182    182    184    191       0s  Completed
+low/map: 40 pods (0 preempted), 89 s from first create to last finish, max 6 running at once, pending max 28 s / mean 2.5 s, nodes hw5-worker, hw5-worker2
+urgent/hw3-job: 1 pods (0 preempted), 25 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker
+low/reduce: 4 pods (0 preempted), 10 s from first create to last finish, max 4 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+low/commit: 1 pods (0 preempted), 9 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker2
+
+PS> Show-Log hw5 job/low-commit | Select-Object -Last 15
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+

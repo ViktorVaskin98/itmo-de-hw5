@@ -1,0 +1,35 @@
+﻿[mem] pod hw3-below-blgwl: memory.max 512 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 16838656, "anon": 15249408, "file": 503808, "kernel": 536576}
+[mem]    0.5 s  current     33 MiB  anon     31  file     0  kernel    1
+[mem-json] {"t": 0.51, "current": 34758656, "anon": 32681984, "file": 503808, "kernel": 888832}
+[mem]    1.0 s  current     45 MiB  anon     43  file     0  kernel    1
+[mem-json] {"t": 1.01, "current": 47091712, "anon": 45146112, "file": 503808, "kernel": 1191936}
+[mem]    1.5 s  current     53 MiB  anon     51  file     0  kernel    2
+[mem-json] {"t": 1.52, "current": 55762944, "anon": 53211136, "file": 503808, "kernel": 1638400}
+[mem]    2.0 s  current     71 MiB  anon     67  file     0  kernel    3
+[mem-json] {"t": 2.02, "current": 74412032, "anon": 70037504, "file": 503808, "kernel": 3616768}
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-184258-eb7f26
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/hw3-below/ (0.14 s)
+[mem]    2.6 s  current    144 MiB  anon    137  file     0  kernel    5
+[mem-json] {"t": 2.56, "current": 151396352, "anon": 143568896, "file": 503808, "kernel": 5550080}
+[mem]    3.1 s  current    171 MiB  anon    164  file     0  kernel    6
+[mem-json] {"t": 3.07, "current": 179253248, "anon": 171507712, "file": 503808, "kernel": 5865472}
+[mem]    3.6 s  current    211 MiB  anon    204  file     0  kernel    6
+[mem-json] {"t": 3.62, "current": 221552640, "anon": 213749760, "file": 503808, "kernel": 6082560}
+[mem]    4.1 s  current    281 MiB  anon    271  file     0  kernel    8
+[mem-json] {"t": 4.13, "current": 294420480, "anon": 283914240, "file": 503808, "kernel": 8245248}
+[mem]    4.7 s  current    307 MiB  anon    297  file     0  kernel    8
+[mem-json] {"t": 4.65, "current": 321445888, "anon": 311070720, "file": 503808, "kernel": 8859648}
+[mem]    5.2 s  current    345 MiB  anon    334  file     0  kernel    9
+[mem-json] {"t": 5.16, "current": 361529344, "anon": 350277632, "file": 503808, "kernel": 9117696}
+[mem]    5.7 s  current    372 MiB  anon    361  file     0  kernel    9
+[mem-json] {"t": 5.67, "current": 389926912, "anon": 378494976, "file": 503808, "kernel": 9322496}
+[mem]    6.2 s  current    447 MiB  anon    435  file     0  kernel   10
+[mem-json] {"t": 6.17, "current": 468287488, "anon": 455909376, "file": 503808, "kernel": 10350592}
+[mem]    6.7 s  current    503 MiB  anon    493  file     0  kernel    9
+[mem-json] {"t": 6.68, "current": 527228928, "anon": 516567040, "file": 503808, "kernel": 9670656}
+[mem]    7.2 s  current    503 MiB  anon    493  file     0  kernel    9
+[mem-json] {"t": 7.19, "current": 527015936, "anon": 516587520, "file": 503808, "kernel": 9670656}

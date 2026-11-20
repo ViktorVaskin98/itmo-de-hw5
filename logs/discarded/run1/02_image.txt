@@ -1,0 +1,54 @@
+﻿
+# Образ с программой из ДЗ 3: python 3.13-slim + uv, зависимости по uv.lock, пользователь uid 10001
+
+PS> Get-Content Dockerfile
+FROM python:3.13-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /usr/local/bin/uv
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PYTHONUNBUFFERED=1 \
+    PYTHONUTF8=1 \
+    PATH=/opt/venv/bin:$PATH
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
+COPY src ./src
+RUN uv sync --frozen --no-dev
+
+RUN useradd --uid 10001 --create-home hhlake && install -d -o hhlake /work
+USER 10001
+RUN python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
+
+WORKDIR /work
+CMD ["python", "-m", "hhlake.mapreduce", "--help"]
+
+PS> docker build -q -t $Image .
+sha256:8b2796b91e994fadb7f4b3dcf217078adf4824bc4677f9188acc81f7473da0c0
+
+PS> docker image ls $Image --format "{{.Repository}}:{{.Tag}}  {{.ID}}  {{.Size}}"
+hw5-hhlake:0.3.0  8b2796b91e99  1.07GB
+
+PS> docker run --rm $Image sh -c "id; python --version; python -c 'import boto3, duckdb, pyarrow; print(boto3.__version__, duckdb.__version__, pyarrow.__version__)'; python -m hhlake.mapreduce --help | head -3"
+uid=10001(hhlake) gid=10001(hhlake) groups=10001(hhlake)
+Python 3.13.18
+1.44.7 2.0.1 26.0.1
+usage: python -m hhlake.mapreduce [-h] [--bucket BUCKET] [--key KEY]
+                                  [--output OUTPUT] [--chunk-mb CHUNK_MB]
+                                  [--workers WORKERS] [--reducers REDUCERS]
+
+# Реестра нет: образ копируется прямо в containerd узлов, в манифестах imagePullPolicy: Never
+
+PS> kind load docker-image $Image --name $Cluster
+Image: "hw5-hhlake:0.3.0" with ID "sha256:8b2796b91e994fadb7f4b3dcf217078adf4824bc4677f9188acc81f7473da0c0" not yet present on node "hw5-worker2", loading...
+Image: "hw5-hhlake:0.3.0" with ID "sha256:8b2796b91e994fadb7f4b3dcf217078adf4824bc4677f9188acc81f7473da0c0" not yet present on node "hw5-worker", loading...
+Image: "hw5-hhlake:0.3.0" with ID "sha256:8b2796b91e994fadb7f4b3dcf217078adf4824bc4677f9188acc81f7473da0c0" not yet present on node "hw5-control-plane", loading...
+
+PS> docker exec hw5-worker crictl images | Select-String "hhlake|IMAGE"
+
+IMAGE                                           TAG                  IMAGE ID            SIZE
+docker.io/library/hw5-hhlake                    0.3.0                8cf3635593f87       277MB
+

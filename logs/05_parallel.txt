@@ -1,0 +1,317 @@
+﻿
+# Этап 3. Расчёт параллельными заданиями: Indexed Job map (индекс пода = номер сплита по 32 MiB), Indexed Job reduce (индекс = партиция), задание commit сводит счётчики и сверяет результат с ДЗ 3
+
+PS> Get-Content k8s\30-map-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${RUN}-map
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: hhlake
+    hw5/run: ${RUN}
+    hw5/stage: map
+spec:
+  completionMode: Indexed
+  completions: ${SPLITS}
+  parallelism: ${PARALLELISM}
+  backoffLimitPerIndex: 2
+  maxFailedIndexes: 0
+  podFailurePolicy:
+    rules:
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+      - action: FailIndex
+        onExitCodes:
+          containerName: map
+          operator: In
+          values: [137]
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhlake
+        hw5/run: ${RUN}
+        hw5/stage: map
+    spec:
+      restartPolicy: Never
+      priorityClassName: ${PRIORITY}
+      nodeSelector:
+        hw5/pool: batch
+      containers:
+        - name: map
+          image: hw5-hhlake:0.3.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - -m
+            - hhlake.kube.memwatch
+            - --report-every
+            - "5"
+            - --
+            - python
+            - -m
+            - hhlake.kube.maptask
+            - --run
+            - ${RUN}
+            - --chunk-mb
+            - "${CHUNK_MB}"
+            - --reducers
+            - "${REDUCERS}"
+          env:
+            - name: S3_ENDPOINT
+              value: http://rustfs.hw5.svc.cluster.local:9000
+          envFrom:
+            - secretRef:
+                name: s3-credentials
+          resources:
+            requests:
+              cpu: "${CPU}"
+              memory: ${MEMORY}
+            limits:
+              cpu: "${CPU}"
+              memory: ${MEMORY}
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: work
+          emptyDir: {}
+
+PS> "splits: $Splits"
+splits: 26
+
+# Пробный прогон с пределом 512Mi на под: замер пика map и reduce
+
+PS> Start-Map $probe
+job.batch/probe-map created
+
+PS> Complete-Run $probe
+map: Complete
+job.batch/probe-reduce created
+reduce: Complete
+job.batch/probe-commit created
+commit: Complete
+
+PS> uvpy -m hhlake.kube.sizing (Get-ChildItem logs\pods\runs\probe\probe-map-*.log).FullName
+pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled
+probe-map-0                  512Mi     11.8       81 MiB     72      3     5.3      0.1 s
+probe-map-1                  512Mi     12.0       79 MiB     72      2     5.2      0.0 s
+probe-map-10                 512Mi      4.4       78 MiB     72      0     2.9      0.0 s
+probe-map-11                 512Mi      7.0       80 MiB     72      2     5.0      0.0 s
+probe-map-12                 512Mi      4.7       78 MiB     72      0     2.8      0.0 s
+probe-map-13                 512Mi      8.1       79 MiB     72      1     5.4      0.4 s
+probe-map-14                 512Mi      7.9       79 MiB     72      1     5.1      0.1 s
+probe-map-15                 512Mi      8.3       81 MiB     73      4     4.9      0.0 s
+probe-map-16                 512Mi      8.0       78 MiB     72      0     4.3      0.0 s
+probe-map-17                 512Mi      7.1       78 MiB     73      0     4.3      0.0 s
+probe-map-18                 512Mi      5.8       82 MiB     72      4     3.5      0.0 s
+probe-map-19                 512Mi      7.2       79 MiB     73      1     3.5      0.0 s
+probe-map-2                  512Mi     11.9       82 MiB     73      3     5.3      0.0 s
+probe-map-20                 512Mi      8.0       80 MiB     73      3     4.3      0.1 s
+probe-map-21                 512Mi      8.8       77 MiB     72      0     4.9      0.0 s
+probe-map-22                 512Mi      8.6       79 MiB     73      0     4.0      0.0 s
+probe-map-23                 512Mi      8.7       79 MiB     73      0     5.3      0.0 s
+probe-map-24                 512Mi      3.4       82 MiB     73      4     2.8      0.0 s
+probe-map-25                 512Mi      3.0       78 MiB     72      0     2.5      0.0 s
+probe-map-3                  512Mi     11.8       80 MiB     72      2     5.0      0.0 s
+probe-map-4                  512Mi      4.1       78 MiB     72      0     2.8      0.0 s
+probe-map-5                  512Mi     11.8       80 MiB     72      2     5.0      0.0 s
+probe-map-6                  512Mi     11.9       80 MiB     73      2     5.3      0.0 s
+probe-map-7                  512Mi      4.2       79 MiB     72      0     2.8      0.0 s
+probe-map-8                  512Mi      4.3       78 MiB     72      0     2.8      0.0 s
+probe-map-9                  512Mi      4.7       77 MiB     72      0     2.8      0.0 s
+runs 26, memory.peak min 77 / median 79 / max 82 MiB
+limit = ceil(max peak 82 MiB x 1.2 / 64 MiB) x 64 MiB = 128Mi
+
+PS> uvpy -m hhlake.kube.sizing (Get-ChildItem logs\pods\runs\probe\probe-reduce-*.log).FullName
+pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled
+probe-reduce-0               512Mi      4.2       69 MiB     64      1     2.9      0.0 s
+probe-reduce-1               512Mi      4.3       71 MiB     64      2     3.0      0.0 s
+probe-reduce-2               512Mi      4.7       71 MiB     64      2     3.0      0.1 s
+probe-reduce-3               512Mi      4.6       70 MiB     64      1     3.0      0.2 s
+runs 4, memory.peak min 69 / median 71 / max 71 MiB
+limit = ceil(max peak 71 MiB x 1.2 / 64 MiB) x 64 MiB = 128Mi
+
+# Пределы по пику: map 128Mi, reduce 128Mi; сохранены в logs/run_limits.json для этапов 4-6
+
+PS> Start-Map $par
+job.batch/par-map created
+
+# Одновременно работают 6 подов, а не 8: у воркера allocatable 4 CPU, но 100m уже запросил под kindnet (DaemonSet сети), и четвёртый под с 1 CPU не помещается
+
+PS> Wait-Running hw5 "hw5/run=par" 6
+6 pods Running at 18:47:05 UTC
+
+PS> kc describe node hw5-worker | Select-String -Pattern "Non-terminated Pods:" -Context 0,10
+
+> Non-terminated Pods:          (5 in total)
+    Namespace                   Name                CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+    ---------                   ----                ------------  ----------  ---------------  -------------  ---
+    hw5                         par-map-1-48ccn     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s
+    hw5                         par-map-2-l6tzs     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s
+    hw5                         par-map-3-28m2t     1 (25%)       1 (25%)     128Mi (5%)       128Mi (5%)     3s
+    kube-system                 kindnet-twlvr       100m (2%)     0 (0%)      50Mi (2%)        0 (0%)         12m
+    kube-system                 kube-proxy-b9p2f    0 (0%)        0 (0%)      0 (0%)           0 (0%)         12m
+  Allocated resources:
+    (Total limits may be over 100 percent, i.e., overcommitted.)
+    Resource           Requests     Limits
+
+PS> Pods hw5 "hw5/run=par" | Select-Object -First 12
+POD               PRIORITY    PHASE     NODE          NOMINATED   CPU
+par-map-0-5rwbf   batch-low   Running   hw5-worker2   <none>      1
+par-map-1-48ccn   batch-low   Running   hw5-worker    <none>      1
+par-map-2-l6tzs   batch-low   Running   hw5-worker    <none>      1
+par-map-3-28m2t   batch-low   Running   hw5-worker    <none>      1
+par-map-4-b5jqp   batch-low   Running   hw5-worker2   <none>      1
+par-map-5-7cgjw   batch-low   Pending   <none>        <none>      1
+par-map-6-nn5qh   batch-low   Running   hw5-worker2   <none>      1
+par-map-7-kz4gm   batch-low   Pending   <none>        <none>      1
+
+PS> Complete-Run $par
+map: Complete
+job.batch/par-reduce created
+reduce: Complete
+job.batch/par-commit created
+commit: Complete
+
+PS> Show-Job hw5 par-map; Show-Job hw5 par-reduce
+JOB       COMPLETIONS   SUCCEEDED   FAILED   START                  END
+par-map   26            26          <none>   2026-11-20T18:47:03Z   2026-11-20T18:47:44Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+JOB          COMPLETIONS   SUCCEEDED   FAILED   START                  END
+par-reduce   4             4           <none>   2026-11-20T18:47:45Z   2026-11-20T18:47:55Z
+SuccessCriteriaMet=True CompletionsReached: Reached expected number of succeeded pods
+Complete=True CompletionsReached: Reached expected number of succeeded pods
+
+PS> kc -n hw5 get pods -l hw5/run=par -o "custom-columns=POD:.metadata.name,NODE:.spec.nodeName,PHASE:.status.phase,INDEX:.metadata.annotations.batch\.kubernetes\.io/job-completion-index" | Select-Object -First 8
+POD                  NODE          PHASE       INDEX
+par-commit-6vdjn     hw5-worker2   Succeeded   <none>
+par-map-0-5rwbf      hw5-worker2   Succeeded   0
+par-map-1-48ccn      hw5-worker    Succeeded   1
+par-map-10-nxlqp     hw5-worker2   Succeeded   10
+par-map-11-8d9cp     hw5-worker2   Succeeded   11
+par-map-12-25mgw     hw5-worker2   Succeeded   12
+par-map-13-rrchw     hw5-worker    Succeeded   13
+
+PS> uvpy tools\timeline.py logs\state\runs\par
+times in seconds from 18:47:03 UTC: created, scheduled, started, finished
+pod                     node          created  sched  start    end  pending  result
+par-map-0-5rwbf         hw5-worker2         0      0      1     10       0s  Completed
+par-map-1-48ccn         hw5-worker          0      0      1     10       0s  Completed
+par-map-2-l6tzs         hw5-worker          0      0      1     11       0s  Completed
+par-map-3-28m2t         hw5-worker          0      0      1     10       0s  Completed
+par-map-4-b5jqp         hw5-worker2         0      0      1     11       0s  Completed
+par-map-5-7cgjw         hw5-worker2         0     12     13     18      12s  Completed
+par-map-6-nn5qh         hw5-worker2         0      0      1     11       0s  Completed
+par-map-7-kz4gm         hw5-worker          0     12     14     19      12s  Completed
+par-map-10-nxlqp        hw5-worker2        13     13     14     19       0s  Completed
+par-map-11-8d9cp        hw5-worker2        13     13     14     19       0s  Completed
+par-map-8-f9vz8         hw5-worker         13     13     14     19       0s  Completed
+par-map-9-wn2h7         hw5-worker         13     13     14     19       0s  Completed
+par-map-12-25mgw        hw5-worker2        14     20     21     25       6s  Completed
+par-map-13-rrchw        hw5-worker         14     21     21     25       7s  Completed
+par-map-14-gt5zn        hw5-worker         21     21     22     26       0s  Completed
+par-map-15-nd7t7        hw5-worker2        21     21     22     26       0s  Completed
+par-map-16-ccvkf        hw5-worker2        21     21     22     26       0s  Completed
+par-map-17-mw2vt        hw5-worker         22     22     23     27       0s  Completed
+par-map-18-dd5cq        hw5-worker         22     28     29     32       6s  Completed
+par-map-19-dqptk        hw5-worker2        22     26     27     30       4s  Completed
+par-map-20-rhm8w        hw5-worker         27     28     28     32       1s  Completed
+par-map-21-bn7sj        hw5-worker2        28     28     29     33       0s  Completed
+par-map-22-cqdxp        hw5-worker2        28     28     29     34       0s  Completed
+par-map-23-dwhrs        hw5-worker         28     29     30     34       1s  Completed
+par-map-24-c7pv7        hw5-worker2        28     32     33     37       4s  Completed
+par-map-25-sdgzl        hw5-worker         29     35     36     39       6s  Completed
+par-reduce-0-qpz6p      hw5-worker         42     42     43     49       0s  Completed
+par-reduce-1-8mtf7      hw5-worker         42     42     43     49       0s  Completed
+par-reduce-2-dhg52      hw5-worker2        42     42     43     49       0s  Completed
+par-reduce-3-bmwhv      hw5-worker2        42     42     43     49       0s  Completed
+par-commit-6vdjn        hw5-worker2        53     53     53     59       0s  Completed
+par/map: 26 pods (0 preempted), 39 s from first create to last finish, max 6 running at once, pending max 12 s / mean 2.3 s, nodes hw5-worker, hw5-worker2
+par/reduce: 4 pods (0 preempted), 7 s from first create to last finish, max 4 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker, hw5-worker2
+par/commit: 1 pods (0 preempted), 6 s from first create to last finish, max 1 running at once, pending max 0 s / mean 0.0 s, nodes hw5-worker2
+
+PS> Get-Content logs\pods\runs\par\par-map-7-*.log | Where-Object { $_ -notmatch "^\[mem-json\]" }
+[mem] pod par-map-7: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     17 MiB  anon     15  file     1  kernel    1
+[map m0007 par-map-7] split 8/26: bytes 234,881,024-268,435,456 of s3://hh-lake/raw/it_vacancies_2024.csv
+[map m0007 par-map-7] stats {"split": 7, "attempt": 1, "bytes_fetched": 33619969, "cpu_seconds": 0.3468676260000003, "lines": 9063, "parsed": 3211, "in_variant": 124, "with_skills": 98, "emitted": {"1": 578, "2": 2049, "3": 5948}, "written": {"1": 188, "2": 1391, "3": 5290}}
+[map m0007 par-map-7] uploaded 142,015 bytes to s3://hh-lake/shuffle/par/m0007/; plan 0.48 s, map 1.29 s, upload 0.55 s
+[mem] exit code 0, wall 4.7 s
+[mem] peak: memory.peak 83 MiB; sampled every 0.1 s: current 81 MiB, anon 72 MiB, file 4 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.2 s over 4.7 s wall (0.68 CPU avg); throttled 0.0 s in 2 of 48 periods
+[mem-summary] {"pod": "par-map-7", "exit": 0, "wall": 4.731105523009319, "memory_max": 134217728, "memory_peak": 86757376, "sampled": {"current": 85184512, "anon": 75403264, "file": 4620288}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.212001, "cpu_throttled": 0.00685}
+
+PS> Get-Content logs\pods\runs\par\par-reduce-0-*.log | Where-Object { $_ -notmatch "^\[mem-json\]" }
+[mem] pod par-reduce-0: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[reduce r000 par-reduce-0] fetched 78 partition files from 26 splits, 1,097,756 bytes
+[reduce r000 par-reduce-0] stack 1: 404 keys, 5,605 occurrences
+[reduce r000 par-reduce-0] stack 2: 4,145 keys, 13,090 occurrences
+[reduce r000 par-reduce-0] stack 3: 20,431 keys, 50,209 occurrences
+[reduce r000 par-reduce-0] wrote s3://hh-lake/results/k8s/par/*/part-r-00000.csv in 3.05 s
+[mem]    5.0 s  current     65 MiB  anon     60  file     1  kernel    4
+[mem] exit code 0, wall 5.1 s
+[mem] peak: memory.peak 69 MiB; sampled every 0.1 s: current 69 MiB, anon 64 MiB, file 1 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.8 s over 5.1 s wall (0.74 CPU avg); throttled 0.3 s in 13 of 51 periods
+[mem-summary] {"pod": "par-reduce-0", "exit": 0, "wall": 5.100517235987354, "memory_max": 134217728, "memory_peak": 72847360, "sampled": {"current": 72658944, "anon": 67014656, "file": 1421312}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.777413, "cpu_throttled": 0.321909}
+
+PS> Show-Log hw5 job/par-commit
+[commit] run par: 26 map splits by 26 pods, 4 reducers
+[commit] skills   emitted    16,801  reduced    16,801  distinct   1,504  ok
+[commit] pairs    emitted    60,044  reduced    60,044  distinct  16,730  ok
+[commit] triples  emitted   200,072  reduced   200,072  distinct  82,458  ok
+[commit] variant vacancies 3,816, with key_skills 2,951
+[commit] wrote s3://hh-lake/results/k8s/par/_job.json and _SUCCESS
+A = MapReduce s3://hh-lake/results/k8s/par/
+B = MapReduce s3://hh-lake/results/hw3/mapreduce/
+variant vacancies: A 3,816 / B 3,816; with key_skills: A 2,951 / B 2,951  MATCH
+stack      A rows     A sum   B rows     B sum  only A  only B  diff
+skills      1,504    16,801    1,504    16,801       0       0     0  MATCH
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical
+
+# Прямая сверка с файлом из репозитория ДЗ 3: выгружаю частоты пар этого прогона тем же способом, что в ДЗ 3 (--export), и сравниваю побайтно
+
+PS> uvpy -m hhlake.verify --a results/k8s/par --b results/hw3/mapreduce --export work\par_stacks | Select-Object -Last 2
+RESULT: all three stacks are identical
+exported MapReduce result to work\par_stacks/{skills,pairs,triples}.csv
+
+PS> foreach ($n in "skills", "pairs", "triples") { "$n.csv: $((Get-FileHash work\par_stacks\$n.csv).Hash -eq (Get-FileHash (Join-Path $Hw3Stacks "$n.csv")).Hash)" }
+skills.csv: True
+pairs.csv: True
+triples.csv: True
+
+PS> Get-Content work\par_stacks\pairs.csv -TotalCount 11 -Encoding UTF8
+skill1,skill2,vacancies
+c++,linux,908
+c/c++,linux,611
+git,linux,558
+c++,git,542
+c++,qt,535
+c++,stl,411
+linux,qt,326
+c++,python,280
+c++,ооп,280
+c++,sql,273
+
+PS> Storage-Memory
+rustfs-0: restarts 0, memory.current 3241 MiB, anon 1397 MiB, memory.peak 3243 MiB, memory.max 4096 MiB, memory.events low 0,high 0,max 0,oom 0,oom_kill 0,oom_group_kill 0,
+

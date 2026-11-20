@@ -1,0 +1,11 @@
+﻿[mem] pod quota-map-20: memory.max 128 MiB, memory.oom.group 1, cpu.max 1 CPU, cpu.weight 100
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 16601088, "anon": 15433728, "file": 24576, "kernel": 598016}
+[map m0020 quota-map-20] split 21/26: bytes 671,088,640-704,643,072 of s3://hh-lake/raw/it_vacancies_2024.csv
+[map m0020 quota-map-20] stats {"split": 20, "attempt": 1, "bytes_fetched": 33619969, "cpu_seconds": 0.47952590000000006, "lines": 8819, "parsed": 3294, "in_variant": 154, "with_skills": 113, "emitted": {"1": 663, "2": 2573, "3": 9672}, "written": {"1": 262, "2": 1909, "3": 8854}}
+[map m0020 quota-map-20] uploaded 224,512 bytes to s3://hh-lake/shuffle/quota/m0020/; plan 0.40 s, map 1.10 s, upload 0.81 s
+[mem] exit code 0, wall 4.4 s
+[mem] peak: memory.peak 78 MiB; sampled every 0.1 s: current 77 MiB, anon 72 MiB, file 0 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 3.1 s over 4.4 s wall (0.70 CPU avg); throttled 0.0 s in 6 of 44 periods
+[mem-summary] {"pod": "quota-map-20", "exit": 0, "wall": 4.354845833033323, "memory_max": 134217728, "memory_peak": 81666048, "sampled": {"current": 80269312, "anon": 75730944, "file": 294912}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 3.05321, "cpu_throttled": 0.015261}

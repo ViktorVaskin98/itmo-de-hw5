@@ -1,0 +1,321 @@
+﻿
+# Этап 1. Расчёт из ДЗ 3 как задание Kubernetes: мастер и 8 воркеров в одном контейнере, хранилище пока снаружи кластера (rustfs-lab). Обёртка hhlake.kube.memwatch читает память своего cgroup каждые 0.1 с
+
+PS> kc apply -f k8s\00-namespace.yaml -f k8s\05-priority.yaml
+namespace/hw5 created
+secret/s3-credentials created
+priorityclass.scheduling.k8s.io/storage-critical created
+priorityclass.scheduling.k8s.io/batch-low created
+priorityclass.scheduling.k8s.io/batch-high created
+
+PS> Get-Content k8s\10-hw3-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: hhlake
+    hw5/run: ${NAME}
+    hw5/stage: hw3-job
+spec:
+  backoffLimit: 2
+  podFailurePolicy:
+    rules:
+      - action: FailJob
+        onExitCodes:
+          containerName: mapreduce
+          operator: In
+          values: [137]
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhlake
+        hw5/run: ${NAME}
+        hw5/stage: hw3-job
+    spec:
+      restartPolicy: Never
+      priorityClassName: ${PRIORITY}
+      nodeSelector:
+        hw5/pool: batch
+      containers:
+        - name: mapreduce
+          image: hw5-hhlake:0.3.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - -m
+            - hhlake.kube.memwatch
+            - --
+            - python
+            - -m
+            - hhlake.mapreduce
+            - --workers
+            - "${WORKERS}"
+            - --workdir
+            - /work
+            - --output
+            - results/k8s/${NAME}
+          env:
+            - name: S3_ENDPOINT
+              value: ${S3_ENDPOINT}
+          envFrom:
+            - secretRef:
+                name: s3-credentials
+          resources:
+            requests:
+              cpu: "${CPU_REQUEST}"
+              memory: ${MEMORY}
+            limits:
+              cpu: "${CPU_LIMIT}"
+              memory: ${MEMORY}
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: work
+          emptyDir: {}
+
+# Запуск 1: предел 256Mi. В ДЗ 3 пик одного процесса был 91-97 MiB, но процессов в контейнере десять
+
+PS> Run-Hw3 "hw3-256mi" "256Mi"
+job.batch/hw3-256mi created
+job/hw3-256mi -> Failed
+
+PS> Show-Job hw5 hw3-256mi
+JOB         COMPLETIONS   SUCCEEDED   FAILED   START                  END
+hw3-256mi   1             <none>      1        2026-11-20T15:39:04Z   <none>
+FailureTarget=True PodFailurePolicy: Container mapreduce for pod hw5/hw3-256mi-wscxv failed with exit code 137 matching FailJob rule at index 0
+Failed=True PodFailurePolicy: Container mapreduce for pod hw5/hw3-256mi-wscxv failed with exit code 137 matching FailJob rule at index 0
+
+PS> kc -n hw5 get pods -l hw5/run=hw3-256mi -o "custom-columns=POD:.metadata.name,NODE:.spec.nodeName,PHASE:.status.phase,REASON:.status.containerStatuses[0].state.terminated.reason,EXIT:.status.containerStatuses[0].state.terminated.exitCode,QOS:.status.qosClass"
+POD               NODE          PHASE    REASON      EXIT   QOS
+hw3-256mi-wscxv   hw5-worker2   Failed   OOMKilled   137    Burstable
+
+PS> Show-Log hw5 job/hw3-256mi
+[mem] pod hw3-256mi-wscxv: memory.max 256 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[mem]    0.0 s  current     20 MiB  anon     10  file     9  kernel    1
+[mem]    2.0 s  current     87 MiB  anon     62  file    21  kernel    4
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-153908-0b1889
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/hw3-256mi/ (0.24 s)
+
+PS> kc -n hw5 get events --field-selector involvedObject.name=hw3-256mi
+LAST SEEN   TYPE      REASON             OBJECT          MESSAGE
+55s         Normal    SuccessfulCreate   job/hw3-256mi   Created pod: hw3-256mi-wscxv
+3s          Warning   PodFailurePolicy   job/hw3-256mi   Container mapreduce for pod hw5/hw3-256mi-wscxv failed with exit code 137 matching FailJob rule at index 0
+
+# Ядро на узле hw5-worker2: OOM внутри cgroup пода; memory.oom.group=1, поэтому убиты все процессы контейнера, а не самый большой
+
+PS> Kernel-Oom $oomNode $since[$oomNode]
+
+
+# Замер пика: три запуска с пределом 2Gi (заведомо с запасом)
+
+PS> Run-Hw3 hw3-measure-1 2Gi
+job.batch/hw3-measure-1 created
+job/hw3-measure-1 -> Complete
+
+PS> Run-Hw3 hw3-measure-2 2Gi
+job.batch/hw3-measure-2 created
+job/hw3-measure-2 -> Complete
+
+PS> Run-Hw3 hw3-measure-3 2Gi
+job.batch/hw3-measure-3 created
+job/hw3-measure-3 -> Complete
+
+PS> Show-Log hw5 job/hw3-measure-1
+[mem] pod hw3-measure-1-v79gp: memory.max 2048 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[mem]    0.0 s  current     20 MiB  anon     10  file     9  kernel    1
+[mem]    2.0 s  current     87 MiB  anon     62  file    21  kernel    4
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-154003-3d3aba
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/hw3-measure-1/ (0.20 s)
+[mem]    4.1 s  current    359 MiB  anon    328  file    20  kernel    9
+[mem]    6.2 s  current    469 MiB  anon    435  file    23  kernel    9
+[mem]    8.2 s  current    512 MiB  anon    481  file    23  kernel    9
+[mem]   10.2 s  current    531 MiB  anon    499  file    22  kernel    9
+[mem]   12.3 s  current    529 MiB  anon    495  file    24  kernel   10
+[mem]   14.3 s  current    536 MiB  anon    500  file    24  kernel   10
+[mem]   16.4 s  current    536 MiB  anon    501  file    25  kernel   10
+[mem]   18.4 s  current    538 MiB  anon    502  file    26  kernel   10
+[mem]   20.4 s  current    535 MiB  anon    498  file    27  kernel   10
+[master] map phase: 18.54 s, 26 attempts, 0 failed
+[mem]   22.5 s  current    555 MiB  anon    517  file    28  kernel   10
+[master] reduce phase: 2.91 s, 4 attempts, 0 failed
+[master] worker processes spawned: 8 (reused across tasks)
+[mem]   24.5 s  current    107 MiB  anon     71  file    30  kernel    6
+[master] fetched 849,257,809 bytes (1.0019 x input), lines 229,388, csv-parsed 87,803
+[master] variant vacancies: 3,816, with key_skills: 2,951
+[master] map CPU time, all tasks: 18.2 s
+stack        emitted  after combine  distinct   sum count
+skills        16,801          5,626     1,504      16,801
+pairs         60,044         40,738    16,730      60,044
+triples      200,072        169,890    82,458     200,072
+-- top skills
+   1950  c++
+   1537  linux
+    918  c/c++
+    849  git
+    640  qt
+    480  stl
+    386  python
+    360  ооп
+    327  sql
+    299  boost
+-- top pairs
+    908  c++ + linux
+    611  c/c++ + linux
+    558  git + linux
+    542  c++ + git
+    535  c++ + qt
+    411  c++ + stl
+    326  linux + qt
+    280  c++ + python
+    280  c++ + ооп
+    273  c++ + sql
+-- top triples
+    323  c++ + git + linux
+    252  c++ + linux + qt
+    214  c++ + git + qt
+    201  c/c++ + git + linux
+    187  c++ + linux + stl
+    174  boost + c++ + stl
+    170  c++ + c/c++ + linux
+    164  git + linux + qt
+    153  c++ + linux + python
+    136  c++ + git + ооп
+[master] output s3://hh-lake/results/k8s/hw3-measure-1/{skills,pairs,triples}/part-r-*.csv, total 23.02 s
+[mem] exit code 0, wall 25.5 s
+[mem] peak: memory.peak 556 MiB; sampled every 0.1 s: current 556 MiB, anon 517 MiB, file 30 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 35.6 s over 25.5 s wall (1.40 CPU avg); throttled 9.1 s in 51 of 255 periods
+[mem-summary] {"pod": "hw3-measure-1-v79gp", "exit": 0, "wall": 25.501766217988916, "memory_max": 2147483648, "memory_peak": 582791168, "sampled": {"current": 582733824, "anon": 542351360, "file": 31608832}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 35.597915, "cpu_throttled": 9.092976}
+
+PS> uvpy -m hhlake.kube.sizing logs\pods\hw3\hw3-measure-1 logs\pods\hw3\hw3-measure-2 logs\pods\hw3\hw3-measure-3
+pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled
+hw3-measure-1-v79gp         2048Mi     25.5      556 MiB    517     30    35.6      9.1 s
+hw3-measure-2-6dz9z         2048Mi     19.9      539 MiB    520      9    25.1      9.1 s
+hw3-measure-3-t8gmb         2048Mi     18.4      539 MiB    519     10    24.2      0.6 s
+runs 3, memory.peak min 539 / median 539 / max 556 MiB
+limit = ceil(max peak 556 MiB x 1.2 / 64 MiB) x 64 MiB = 704Mi
+
+# Подобранный предел: 704Mi (requests = limits по памяти). Проверка: три запуска с ним
+
+PS> Run-Hw3 hw3-tuned-1 704Mi
+job.batch/hw3-tuned-1 created
+job/hw3-tuned-1 -> Complete
+
+PS> Run-Hw3 hw3-tuned-2 704Mi
+job.batch/hw3-tuned-2 created
+job/hw3-tuned-2 -> Complete
+
+PS> Run-Hw3 hw3-tuned-3 704Mi
+job.batch/hw3-tuned-3 created
+job/hw3-tuned-3 -> Complete
+
+PS> kc -n hw5 get jobs -l hw5/stage=hw3-job -o "custom-columns=JOB:.metadata.name,SUCCEEDED:.status.succeeded,FAILED:.status.failed,START:.status.startTime,END:.status.completionTime"
+JOB             SUCCEEDED   FAILED   START                  END
+hw3-256mi       <none>      1        2026-11-20T15:39:04Z   <none>
+hw3-measure-1   1           <none>   2026-11-20T15:40:00Z   2026-11-20T15:40:27Z
+hw3-measure-2   1           <none>   2026-11-20T15:40:29Z   2026-11-20T15:40:49Z
+hw3-measure-3   1           <none>   2026-11-20T15:40:51Z   2026-11-20T15:41:10Z
+hw3-tuned-1     1           <none>   2026-11-20T15:41:14Z   2026-11-20T15:41:35Z
+hw3-tuned-2     1           <none>   2026-11-20T15:41:37Z   2026-11-20T15:41:56Z
+hw3-tuned-3     1           <none>   2026-11-20T15:41:58Z   2026-11-20T15:42:19Z
+
+PS> uvpy -m hhlake.kube.sizing logs\pods\hw3\hw3-tuned-1 logs\pods\hw3\hw3-tuned-2 logs\pods\hw3\hw3-tuned-3
+pod                          limit  wall, s  memory.peak   anon   file  CPU, s  throttled
+hw3-tuned-1-5sspx            704Mi     19.6      567 MiB    517     43    25.1      4.8 s
+hw3-tuned-2-m6tbj            704Mi     18.3      543 MiB    518     14    23.8      9.6 s
+hw3-tuned-3-bhpmf            704Mi     17.7      535 MiB    518      6    23.8      0.2 s
+runs 3, memory.peak min 535 / median 543 / max 567 MiB
+limit = ceil(max peak 567 MiB x 1.2 / 64 MiB) x 64 MiB = 704Mi
+
+PS> Select-String -Path logs\pods\hw3\hw3-tuned-*\*.log -Pattern "memory.events|\[cpu\]" | ForEach-Object { "$($_.Filename): $($_.Line)" }
+hw3-tuned-1-5sspx.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+hw3-tuned-1-5sspx.log: [cpu] usage 25.1 s over 19.6 s wall (1.29 CPU avg); throttled 4.8 s in 34 of 195 periods
+hw3-tuned-2-m6tbj.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+hw3-tuned-2-m6tbj.log: [cpu] usage 23.8 s over 18.3 s wall (1.30 CPU avg); throttled 9.6 s in 32 of 181 periods
+hw3-tuned-3-bhpmf.log: [mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+hw3-tuned-3-bhpmf.log: [cpu] usage 23.8 s over 17.7 s wall (1.35 CPU avg); throttled 0.2 s in 28 of 175 periods
+
+PS> Show-Log hw5 job/hw3-tuned-1 "^\[mem-json\]|^\[mem\] +\d"
+[mem] pod hw3-tuned-1-5sspx: memory.max 704 MiB, memory.oom.group 1, cpu.max 4 CPU, cpu.weight 174
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-154118-c5ddfc
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/hw3-tuned-1/ (0.22 s)
+[master] map phase: 12.46 s, 26 attempts, 0 failed
+[master] reduce phase: 2.35 s, 4 attempts, 0 failed
+[master] worker processes spawned: 8 (reused across tasks)
+[master] fetched 849,257,809 bytes (1.0019 x input), lines 229,388, csv-parsed 87,803
+[master] variant vacancies: 3,816, with key_skills: 2,951
+[master] map CPU time, all tasks: 10.4 s
+stack        emitted  after combine  distinct   sum count
+skills        16,801          5,626     1,504      16,801
+pairs         60,044         40,738    16,730      60,044
+triples      200,072        169,890    82,458     200,072
+-- top skills
+   1950  c++
+   1537  linux
+    918  c/c++
+    849  git
+    640  qt
+    480  stl
+    386  python
+    360  ооп
+    327  sql
+    299  boost
+-- top pairs
+    908  c++ + linux
+    611  c/c++ + linux
+    558  git + linux
+    542  c++ + git
+    535  c++ + qt
+    411  c++ + stl
+    326  linux + qt
+    280  c++ + python
+    280  c++ + ооп
+    273  c++ + sql
+-- top triples
+    323  c++ + git + linux
+    252  c++ + linux + qt
+    214  c++ + git + qt
+    201  c/c++ + git + linux
+    187  c++ + linux + stl
+    174  boost + c++ + stl
+    170  c++ + c/c++ + linux
+    164  git + linux + qt
+    153  c++ + linux + python
+    136  c++ + git + ооп
+[master] output s3://hh-lake/results/k8s/hw3-tuned-1/{skills,pairs,triples}/part-r-*.csv, total 16.60 s
+[mem] exit code 0, wall 19.6 s
+[mem] peak: memory.peak 567 MiB; sampled every 0.1 s: current 567 MiB, anon 517 MiB, file 43 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 25.1 s over 19.6 s wall (1.29 CPU avg); throttled 4.8 s in 34 of 195 periods
+[mem-summary] {"pod": "hw3-tuned-1-5sspx", "exit": 0, "wall": 19.563780895026866, "memory_max": 738197504, "memory_peak": 594632704, "sampled": {"current": 594137088, "anon": 542306304, "file": 44949504}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 25.145445, "cpu_throttled": 4.837892}
+
+# Граница снизу: предел 384Mi (80% пика) - снова OOMKilled
+
+PS> Run-Hw3 hw3-below 384Mi
+job.batch/hw3-below created
+job/hw3-below -> Failed
+
+PS> kc -n hw5 get pods -l hw5/run=hw3-below -o "custom-columns=POD:.metadata.name,NODE:.spec.nodeName,REASON:.status.containerStatuses[0].state.terminated.reason,EXIT:.status.containerStatuses[0].state.terminated.exitCode"
+POD               NODE         REASON      EXIT
+hw3-below-qfchd   hw5-worker   OOMKilled   137
+
+PS> Show-Log hw5 job/hw3-below | Select-Object -Last 6
+[mem]    0.0 s  current     12 MiB  anon     10  file     0  kernel    1
+[master] input s3://hh-lake/raw/it_vacancies_2024.csv: 847,619,384 bytes -> 26 splits x 32 MiB
+[master] workers=8 reducers=4 combiner=True prefilter=True reuse=True
+[master] workdir /work/job-20261120-154222-a64768
+[master] cleared 0 old objects under s3://hh-lake/results/k8s/hw3-below/ (0.21 s)
+[mem]    2.0 s  current    160 MiB  anon    152  file     0  kernel    6
+
+PS> Kernel-Oom $oomNode $since[$oomNode] | Select-Object -First 3
+
+

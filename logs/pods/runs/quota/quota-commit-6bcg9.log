@@ -1,0 +1,26 @@
+﻿[commit] run quota: 26 map splits by 26 pods, 4 reducers
+[commit] skills   emitted    16,801  reduced    16,801  distinct   1,504  ok
+[commit] pairs    emitted    60,044  reduced    60,044  distinct  16,730  ok
+[commit] triples  emitted   200,072  reduced   200,072  distinct  82,458  ok
+[commit] variant vacancies 3,816, with key_skills 2,951
+[commit] wrote s3://hh-lake/results/k8s/quota/_job.json and _SUCCESS
+A = MapReduce s3://hh-lake/results/k8s/quota/
+B = MapReduce s3://hh-lake/results/hw3/mapreduce/
+variant vacancies: A 3,816 / B 3,816; with key_skills: A 2,951 / B 2,951  MATCH
+stack      A rows     A sum   B rows     B sum  only A  only B  diff
+skills      1,504    16,801    1,504    16,801       0       0     0  MATCH
+pairs      16,730    60,044   16,730    60,044       0       0     0  MATCH
+triples    82,458   200,072   82,458   200,072       0       0     0  MATCH
+top-10 pairs: A | B
+  1  c++ + linux  908            | c++ + linux  908            =
+  2  c/c++ + linux  611          | c/c++ + linux  611          =
+  3  git + linux  558            | git + linux  558            =
+  4  c++ + git  542              | c++ + git  542              =
+  5  c++ + qt  535               | c++ + qt  535               =
+  6  c++ + stl  411              | c++ + stl  411              =
+  7  linux + qt  326             | linux + qt  326             =
+  8  c++ + python  280           | c++ + python  280           =
+  9  c++ + ооп  280              | c++ + ооп  280              =
+ 10  c++ + sql  273              | c++ + sql  273              =
+top-10 pairs identical
+RESULT: all three stacks are identical

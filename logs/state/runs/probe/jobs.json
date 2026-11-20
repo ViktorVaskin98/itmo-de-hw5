@@ -1,0 +1,474 @@
+﻿{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"commit\"},\"name\":\"probe-commit\",\"namespace\":\"hw5\"},\"spec\":{\"backoffLimit\":1,\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"commit\"}},\"spec\":{\"containers\":[{\"command\":[\"sh\",\"-c\",\"python -m hhlake.kube.commit --run probe --chunk-mb 32 --reducers 4 \\u0026\\u0026 python -m hhlake.verify --a results/k8s/probe --b results/hw3/mapreduce --top 10\"],\"env\":[{\"name\":\"S3_ENDPOINT\",\"value\":\"http://rustfs.hw5.svc.cluster.local:9000\"}],\"envFrom\":[{\"secretRef\":{\"name\":\"s3-credentials\"}}],\"image\":\"hw5-hhlake:0.3.0\",\"imagePullPolicy\":\"Never\",\"name\":\"commit\",\"resources\":{\"limits\":{\"cpu\":\"1\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"}}}],\"nodeSelector\":{\"hw5/pool\":\"batch\"},\"priorityClassName\":\"batch-low\",\"restartPolicy\":\"Never\"}}}}\n"
+                },
+                "creationTimestamp": "2026-11-20T18:46:39Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/name": "hhlake",
+                    "hw5/run": "probe",
+                    "hw5/stage": "commit"
+                },
+                "name": "probe-commit",
+                "namespace": "hw5",
+                "resourceVersion": "2549",
+                "uid": "30fd40e8-8a81-44c8-a967-5285cdedfbbf"
+            },
+            "spec": {
+                "backoffLimit": 1,
+                "completionMode": "NonIndexed",
+                "completions": 1,
+                "manualSelector": false,
+                "parallelism": 1,
+                "podReplacementPolicy": "TerminatingOrFailed",
+                "selector": {
+                    "matchLabels": {
+                        "batch.kubernetes.io/controller-uid": "30fd40e8-8a81-44c8-a967-5285cdedfbbf"
+                    }
+                },
+                "suspend": false,
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/name": "hhlake",
+                            "batch.kubernetes.io/controller-uid": "30fd40e8-8a81-44c8-a967-5285cdedfbbf",
+                            "batch.kubernetes.io/job-name": "probe-commit",
+                            "controller-uid": "30fd40e8-8a81-44c8-a967-5285cdedfbbf",
+                            "hw5/run": "probe",
+                            "hw5/stage": "commit",
+                            "job-name": "probe-commit"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "command": [
+                                    "sh",
+                                    "-c",
+                                    "python -m hhlake.kube.commit --run probe --chunk-mb 32 --reducers 4 \u0026\u0026 python -m hhlake.verify --a results/k8s/probe --b results/hw3/mapreduce --top 10"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "S3_ENDPOINT",
+                                        "value": "http://rustfs.hw5.svc.cluster.local:9000"
+                                    }
+                                ],
+                                "envFrom": [
+                                    {
+                                        "secretRef": {
+                                            "name": "s3-credentials"
+                                        }
+                                    }
+                                ],
+                                "image": "hw5-hhlake:0.3.0",
+                                "imagePullPolicy": "Never",
+                                "name": "commit",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "1",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "500m",
+                                        "memory": "512Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "hw5/pool": "batch"
+                        },
+                        "priorityClassName": "batch-low",
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2026-11-20T18:46:49Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:49Z",
+                        "lastTransitionTime": "2026-11-20T18:46:49Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "SuccessCriteriaMet"
+                    },
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:49Z",
+                        "lastTransitionTime": "2026-11-20T18:46:49Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "ready": 0,
+                "startTime": "2026-11-20T18:46:39Z",
+                "succeeded": 1,
+                "terminating": 0,
+                "uncountedTerminatedPods": {}
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"map\"},\"name\":\"probe-map\",\"namespace\":\"hw5\"},\"spec\":{\"backoffLimitPerIndex\":2,\"completionMode\":\"Indexed\",\"completions\":26,\"maxFailedIndexes\":0,\"parallelism\":8,\"podFailurePolicy\":{\"rules\":[{\"action\":\"Ignore\",\"onPodConditions\":[{\"type\":\"DisruptionTarget\"}]},{\"action\":\"FailIndex\",\"onExitCodes\":{\"containerName\":\"map\",\"operator\":\"In\",\"values\":[137]}}]},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"map\"}},\"spec\":{\"containers\":[{\"command\":[\"python\",\"-m\",\"hhlake.kube.memwatch\",\"--report-every\",\"5\",\"--\",\"python\",\"-m\",\"hhlake.kube.maptask\",\"--run\",\"probe\",\"--chunk-mb\",\"32\",\"--reducers\",\"4\"],\"env\":[{\"name\":\"S3_ENDPOINT\",\"value\":\"http://rustfs.hw5.svc.cluster.local:9000\"}],\"envFrom\":[{\"secretRef\":{\"name\":\"s3-credentials\"}}],\"image\":\"hw5-hhlake:0.3.0\",\"imagePullPolicy\":\"Never\",\"name\":\"map\",\"resources\":{\"limits\":{\"cpu\":\"1\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"1\",\"memory\":\"512Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/work\",\"name\":\"work\"}]}],\"nodeSelector\":{\"hw5/pool\":\"batch\"},\"priorityClassName\":\"batch-low\",\"restartPolicy\":\"Never\",\"volumes\":[{\"emptyDir\":{},\"name\":\"work\"}]}}}}\n"
+                },
+                "creationTimestamp": "2026-11-20T18:45:32Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/name": "hhlake",
+                    "hw5/run": "probe",
+                    "hw5/stage": "map"
+                },
+                "name": "probe-map",
+                "namespace": "hw5",
+                "resourceVersion": "2447",
+                "uid": "2a2e0901-ad5f-48b1-b8ad-2601b516151b"
+            },
+            "spec": {
+                "backoffLimit": 2147483647,
+                "backoffLimitPerIndex": 2,
+                "completionMode": "Indexed",
+                "completions": 26,
+                "manualSelector": false,
+                "maxFailedIndexes": 0,
+                "parallelism": 8,
+                "podFailurePolicy": {
+                    "rules": [
+                        {
+                            "action": "Ignore",
+                            "onPodConditions": [
+                                {
+                                    "status": "True",
+                                    "type": "DisruptionTarget"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "FailIndex",
+                            "onExitCodes": {
+                                "containerName": "map",
+                                "operator": "In",
+                                "values": [
+                                    137
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "podReplacementPolicy": "Failed",
+                "selector": {
+                    "matchLabels": {
+                        "batch.kubernetes.io/controller-uid": "2a2e0901-ad5f-48b1-b8ad-2601b516151b"
+                    }
+                },
+                "suspend": false,
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/name": "hhlake",
+                            "batch.kubernetes.io/controller-uid": "2a2e0901-ad5f-48b1-b8ad-2601b516151b",
+                            "batch.kubernetes.io/job-name": "probe-map",
+                            "controller-uid": "2a2e0901-ad5f-48b1-b8ad-2601b516151b",
+                            "hw5/run": "probe",
+                            "hw5/stage": "map",
+                            "job-name": "probe-map"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "command": [
+                                    "python",
+                                    "-m",
+                                    "hhlake.kube.memwatch",
+                                    "--report-every",
+                                    "5",
+                                    "--",
+                                    "python",
+                                    "-m",
+                                    "hhlake.kube.maptask",
+                                    "--run",
+                                    "probe",
+                                    "--chunk-mb",
+                                    "32",
+                                    "--reducers",
+                                    "4"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "S3_ENDPOINT",
+                                        "value": "http://rustfs.hw5.svc.cluster.local:9000"
+                                    }
+                                ],
+                                "envFrom": [
+                                    {
+                                        "secretRef": {
+                                            "name": "s3-credentials"
+                                        }
+                                    }
+                                ],
+                                "image": "hw5-hhlake:0.3.0",
+                                "imagePullPolicy": "Never",
+                                "name": "map",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "1",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "1",
+                                        "memory": "512Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/work",
+                                        "name": "work"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "hw5/pool": "batch"
+                        },
+                        "priorityClassName": "batch-low",
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30,
+                        "volumes": [
+                            {
+                                "emptyDir": {},
+                                "name": "work"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "completedIndexes": "0-25",
+                "completionTime": "2026-11-20T18:46:29Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:29Z",
+                        "lastTransitionTime": "2026-11-20T18:46:29Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "SuccessCriteriaMet"
+                    },
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:29Z",
+                        "lastTransitionTime": "2026-11-20T18:46:29Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "failedIndexes": "",
+                "ready": 0,
+                "startTime": "2026-11-20T18:45:32Z",
+                "succeeded": 26,
+                "terminating": 0,
+                "uncountedTerminatedPods": {}
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"reduce\"},\"name\":\"probe-reduce\",\"namespace\":\"hw5\"},\"spec\":{\"backoffLimitPerIndex\":2,\"completionMode\":\"Indexed\",\"completions\":4,\"maxFailedIndexes\":0,\"parallelism\":4,\"podFailurePolicy\":{\"rules\":[{\"action\":\"Ignore\",\"onPodConditions\":[{\"type\":\"DisruptionTarget\"}]},{\"action\":\"FailIndex\",\"onExitCodes\":{\"containerName\":\"reduce\",\"operator\":\"In\",\"values\":[137]}}]},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/name\":\"hhlake\",\"hw5/run\":\"probe\",\"hw5/stage\":\"reduce\"}},\"spec\":{\"containers\":[{\"command\":[\"python\",\"-m\",\"hhlake.kube.memwatch\",\"--report-every\",\"5\",\"--\",\"python\",\"-m\",\"hhlake.kube.reducetask\",\"--run\",\"probe\",\"--chunk-mb\",\"32\",\"--reducers\",\"4\"],\"env\":[{\"name\":\"S3_ENDPOINT\",\"value\":\"http://rustfs.hw5.svc.cluster.local:9000\"}],\"envFrom\":[{\"secretRef\":{\"name\":\"s3-credentials\"}}],\"image\":\"hw5-hhlake:0.3.0\",\"imagePullPolicy\":\"Never\",\"name\":\"reduce\",\"resources\":{\"limits\":{\"cpu\":\"1\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"1\",\"memory\":\"512Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/work\",\"name\":\"work\"}]}],\"nodeSelector\":{\"hw5/pool\":\"batch\"},\"priorityClassName\":\"batch-low\",\"restartPolicy\":\"Never\",\"volumes\":[{\"emptyDir\":{},\"name\":\"work\"}]}}}}\n"
+                },
+                "creationTimestamp": "2026-11-20T18:46:30Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/name": "hhlake",
+                    "hw5/run": "probe",
+                    "hw5/stage": "reduce"
+                },
+                "name": "probe-reduce",
+                "namespace": "hw5",
+                "resourceVersion": "2515",
+                "uid": "38d1dddf-897a-43e0-9217-ceee51d4c0cc"
+            },
+            "spec": {
+                "backoffLimit": 2147483647,
+                "backoffLimitPerIndex": 2,
+                "completionMode": "Indexed",
+                "completions": 4,
+                "manualSelector": false,
+                "maxFailedIndexes": 0,
+                "parallelism": 4,
+                "podFailurePolicy": {
+                    "rules": [
+                        {
+                            "action": "Ignore",
+                            "onPodConditions": [
+                                {
+                                    "status": "True",
+                                    "type": "DisruptionTarget"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "FailIndex",
+                            "onExitCodes": {
+                                "containerName": "reduce",
+                                "operator": "In",
+                                "values": [
+                                    137
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "podReplacementPolicy": "Failed",
+                "selector": {
+                    "matchLabels": {
+                        "batch.kubernetes.io/controller-uid": "38d1dddf-897a-43e0-9217-ceee51d4c0cc"
+                    }
+                },
+                "suspend": false,
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/name": "hhlake",
+                            "batch.kubernetes.io/controller-uid": "38d1dddf-897a-43e0-9217-ceee51d4c0cc",
+                            "batch.kubernetes.io/job-name": "probe-reduce",
+                            "controller-uid": "38d1dddf-897a-43e0-9217-ceee51d4c0cc",
+                            "hw5/run": "probe",
+                            "hw5/stage": "reduce",
+                            "job-name": "probe-reduce"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "command": [
+                                    "python",
+                                    "-m",
+                                    "hhlake.kube.memwatch",
+                                    "--report-every",
+                                    "5",
+                                    "--",
+                                    "python",
+                                    "-m",
+                                    "hhlake.kube.reducetask",
+                                    "--run",
+                                    "probe",
+                                    "--chunk-mb",
+                                    "32",
+                                    "--reducers",
+                                    "4"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "S3_ENDPOINT",
+                                        "value": "http://rustfs.hw5.svc.cluster.local:9000"
+                                    }
+                                ],
+                                "envFrom": [
+                                    {
+                                        "secretRef": {
+                                            "name": "s3-credentials"
+                                        }
+                                    }
+                                ],
+                                "image": "hw5-hhlake:0.3.0",
+                                "imagePullPolicy": "Never",
+                                "name": "reduce",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "1",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "1",
+                                        "memory": "512Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/work",
+                                        "name": "work"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "hw5/pool": "batch"
+                        },
+                        "priorityClassName": "batch-low",
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30,
+                        "volumes": [
+                            {
+                                "emptyDir": {},
+                                "name": "work"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "completedIndexes": "0-3",
+                "completionTime": "2026-11-20T18:46:38Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:38Z",
+                        "lastTransitionTime": "2026-11-20T18:46:38Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "SuccessCriteriaMet"
+                    },
+                    {
+                        "lastProbeTime": "2026-11-20T18:46:38Z",
+                        "lastTransitionTime": "2026-11-20T18:46:38Z",
+                        "message": "Reached expected number of succeeded pods",
+                        "reason": "CompletionsReached",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "failedIndexes": "",
+                "ready": 0,
+                "startTime": "2026-11-20T18:46:30Z",
+                "succeeded": 4,
+                "terminating": 0,
+                "uncountedTerminatedPods": {}
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

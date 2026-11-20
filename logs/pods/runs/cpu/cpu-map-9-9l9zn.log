@@ -1,0 +1,11 @@
+﻿[mem] pod cpu-map-9: memory.max 128 MiB, memory.oom.group 1, cpu.max 1.5 CPU, cpu.weight 138
+[mem]    0.0 s  current     16 MiB  anon     15  file     0  kernel    1
+[mem-json] {"t": 0.0, "current": 16654336, "anon": 15405056, "file": 8192, "kernel": 528384}
+[map m0009 cpu-map-9] split 10/26: bytes 301,989,888-335,544,320 of s3://hh-lake/raw/it_vacancies_2024.csv
+[map m0009 cpu-map-9] stats {"split": 9, "attempt": 1, "bytes_fetched": 33619969, "cpu_seconds": 0.29961902500000015, "lines": 9310, "parsed": 3316, "in_variant": 131, "with_skills": 100, "emitted": {"1": 558, "2": 1880, "3": 5979}, "written": {"1": 159, "2": 1081, "3": 3916}}
+[map m0009 cpu-map-9] uploaded 102,960 bytes to s3://hh-lake/shuffle/cpu/m0009/; plan 0.31 s, map 0.74 s, upload 0.65 s
+[mem] exit code 0, wall 3.5 s
+[mem] peak: memory.peak 77 MiB; sampled every 0.1 s: current 76 MiB, anon 72 MiB, file 0 MiB
+[mem] memory.events: low=0, high=0, max=0, oom=0, oom_kill=0, oom_group_kill=0
+[cpu] usage 2.4 s over 3.5 s wall (0.70 CPU avg); throttled 0.0 s in 0 of 35 periods
+[mem-summary] {"pod": "cpu-map-9", "exit": 0, "wall": 3.4639832630055025, "memory_max": 134217728, "memory_peak": 81080320, "sampled": {"current": 80027648, "anon": 75386880, "file": 270336}, "events": {"low": 0, "high": 0, "max": 0, "oom": 0, "oom_kill": 0, "oom_group_kill": 0}, "cpu_usage": 2.410954, "cpu_throttled": 0.0}
