@@ -80,14 +80,22 @@ def main() -> None:
     watcher = Watcher(a.interval, a.report_every)
     watcher.start()
     t0 = time.monotonic()
-    child = subprocess.Popen(command)
+    pending: list[int] = []
+    children: list[subprocess.Popen[bytes]] = []
 
     def forward(signum: int, _frame: object) -> None:
         print(f"[mem] got signal {signal.Signals(signum).name} at {time.monotonic() - t0:.1f} s, forwarding to child")
-        child.send_signal(signum)
+        if children:
+            children[0].send_signal(signum)
+        else:
+            pending.append(signum)
 
     signal.signal(signal.SIGTERM, forward)
     signal.signal(signal.SIGINT, forward)
+    child = subprocess.Popen(command)
+    children.append(child)
+    for signum in pending:
+        child.send_signal(signum)
     code = child.wait()
     if code < 0:
         code = 128 - code

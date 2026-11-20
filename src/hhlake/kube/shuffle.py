@@ -1,14 +1,15 @@
+import csv
 import json
 import os
 from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 
-from hhlake.mapreduce.master import _read_header
 from hhlake.mapreduce.splits import Split, plan_splits
 from hhlake.mapreduce.tasks import JobSpec
 from hhlake.s3 import make_client
@@ -42,10 +43,16 @@ class Run:
         return f"{self.shuffle}/r{partition:03d}"
 
 
+def read_header(s3: BaseClient, bucket: str, key: str) -> dict[str, int]:
+    head = s3.get_object(Bucket=bucket, Key=key, Range="bytes=0-65535")["Body"].read()
+    line = head.split(b"\n", 1)[0].decode("utf-8")
+    return {name: i for i, name in enumerate(next(csv.reader([line])))}
+
+
 def plan(run: Run, s3: BaseClient | None = None) -> tuple[JobSpec, list[Split]]:
     s3 = s3 or make_client()
     size = s3.head_object(Bucket=run.bucket, Key=run.key)["ContentLength"]
-    columns = _read_header(run.bucket, run.key)
+    columns = read_header(s3, run.bucket, run.key)
     job = JobSpec(run.bucket, run.key, size, columns, str(run.workdir / run.run_id), run.reducers)
     return job, plan_splits(size, run.chunk_mb << 20)
 
@@ -99,5 +106,5 @@ def download(s3: BaseClient, bucket: str, keys: list[str], dest: Callable[[str],
     return parallel(get, keys)
 
 
-def read_json(s3: BaseClient, bucket: str, key: str) -> dict:
+def read_json(s3: BaseClient, bucket: str, key: str) -> dict[str, Any]:
     return json.loads(s3.get_object(Bucket=bucket, Key=key)["Body"].read())

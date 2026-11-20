@@ -35,13 +35,19 @@ def main() -> None:
         return
 
     print(f"{tag} split {index + 1}/{len(splits)}: bytes {split.start:,}-{split.end:,} of s3://{run.bucket}/{run.key}")
+    t_map = time.perf_counter()
     run_map(MapTask(job, split, 1))
+    t_upload = time.perf_counter()
     local = map_dir(job, index)
     uploaded = upload_dir(s3, run.bucket, local, prefix)
     s3.put_object(Bucket=run.bucket, Key=f"{prefix}/{MARKER}", Body=pod.encode())
+    t_end = time.perf_counter()
     stats = (local / "stats.json").read_text(encoding="utf-8")
     print(f"{tag} stats {stats}")
-    print(f"{tag} uploaded {uploaded:,} bytes to s3://{run.bucket}/{prefix}/ in {time.perf_counter() - t0:.2f} s")
+    print(
+        f"{tag} uploaded {uploaded:,} bytes to s3://{run.bucket}/{prefix}/; "
+        f"plan {t_map - t0:.2f} s, map {t_upload - t_map:.2f} s, upload {t_end - t_upload:.2f} s"
+    )
 
 
 if __name__ == "__main__":

@@ -31,8 +31,13 @@ def main() -> None:
     if missing:
         raise SystemExit(f"{tag} map output missing for splits {missing}: run the map job first")
 
+    planned = {run.map_prefix(s.index) for s in splits}
     suffix = f"-r{partition:03d}.pkl"
-    keys = [k for k in list_keys(s3, run.bucket, f"{run.shuffle}/m") if k.endswith(suffix)]
+    keys = [
+        k
+        for k in list_keys(s3, run.bucket, f"{run.shuffle}/m")
+        if k.endswith(suffix) and k.rsplit("/", 1)[0] in planned
+    ]
     fetched = download(s3, run.bucket, keys, lambda k: Path(job.workdir) / "map" / Path(k).parent.name / Path(k).name)
     print(f"{tag} fetched {len(keys)} partition files from {len(splits)} splits, {fetched:,} bytes")
 
